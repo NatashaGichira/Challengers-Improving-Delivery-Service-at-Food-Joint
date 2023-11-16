@@ -202,3 +202,47 @@ kable_theme <- function(dat, caption) {
                   full_width = FALSE)
 }
 
+# STEP 3. Load the Dataset ----
+food_delivery_data <-
+  readr::read_csv(
+                  "data/food_delivery_data.CSV", # nolint
+                  )
+
+View(food_delivery_data)
+
+str(food_delivery_data)
+
+# Dimensions
+dim(food_delivery_data)
+
+# Data Types
+sapply(food_delivery_data, class)
+glimpse(food_delivery_data)
+
+# Summary of each variable
+summary(food_delivery_data)
+
+# STEP 4. Create a subset of the data using the "dplyr" package ----
+
+#high traffic deliveries
+food_delivery_data_hightraffic <- food_delivery_data %>% filter(Road_traffic_density == "High")
+summary(food_delivery_data_hightraffic)
+
+# meal order types
+food_delivery_data_meals <- food_delivery_data %>% filter(Type_of_order == "Meal")
+summary(food_delivery_data_meals)
+
+# Average delivery person ratings
+avg_ratings <- food_delivery_data %>% 
+  group_by(Delivery_person_Age) %>% 
+  summarize(avg_ratings = mean(Delivery_person_Ratings, na.rm = TRUE))
+ print(avg_ratings)
+
+ggplot(na.omit(food_delivery_data), aes(x = Delivery_person_Age, y = Delivery_person_Ratings, fill = Delivery_person_Age)) +
+  geom_boxplot() +
+  labs(title = "Age vs. Rating",
+       x = "Age",
+       y = "Ratings",
+       fill = "Age") +
+  theme_minimal()
+

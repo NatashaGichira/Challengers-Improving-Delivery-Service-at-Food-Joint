@@ -19,12 +19,32 @@ if (!is.element("dplyr", installed.packages()[, 1])) {
 }
 require("dplyr")
 
+if (!is.element("NHANES", installed.packages()[, 1])) {
+  install.packages("NHANES", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+require("NHANES")
+
 ## ggplot2 - For data visualizations using the Grammar for Graphics package ----
 if (!is.element("ggplot2", installed.packages()[, 1])) {
 install.packages("ggplot2", dependencies = TRUE,
 repos = "https://cloud.r-project.org")
 }
 require("ggplot2")
+
+## Amelia ----
+if (!is.element("Amelia", installed.packages()[, 1])) {
+  install.packages("Amelia", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+require("Amelia")
+
+## Mice ----
+if (!is.element("mice", installed.packages()[, 1])) {
+  install.packages("mice", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+require("mice")
 
 ## ggrepel - Additional options for the Grammar for Graphics package ----
 if (!is.element("ggrepel", installed.packages()[, 1])) {
@@ -151,6 +171,38 @@ repos = "https://cloud.r-project.org")
 }
 require("readr")
 
+## FactoMineR ----
+if (require("FactoMineR")) {
+  require("FactoMineR")
+} else {
+  install.packages("FactoMineR", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## caret ----
+if (require("caret")) {
+  require("caret")
+} else {
+  install.packages("caret", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## e1071 ----
+if (require("e1071")) {
+  require("e1071")
+} else {
+  install.packages("e1071", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## factoextra ----
+if (require("factoextra")) {
+  require("factoextra")
+} else {
+  install.packages("factoextra", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
 # The following defines a blue-grey colour scheme for the visualizations:
 ## shades of blue and shades of grey
 blue_grey_colours_11 <- c("#27408E", "#304FAF", "#536CB5", "#6981c7", "#8da0db",
@@ -246,3 +298,13 @@ ggplot(na.omit(food_delivery_data), aes(x = Delivery_person_Age, y = Delivery_pe
        fill = "Age") +
   theme_minimal()
 
+# data imputation
+
+# Create a mice imputation model
+imputation_model <- mice(food_delivery_data, method = "pmm", m = 5)
+
+# Perform the imputation
+food_delivery_data_imputed <- complete(imputation_model)
+
+# View the imputed data
+head(food_delivery_data_imputed)

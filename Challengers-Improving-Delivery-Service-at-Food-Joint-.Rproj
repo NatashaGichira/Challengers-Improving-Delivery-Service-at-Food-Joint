@@ -1,338 +1,491 @@
-Version: 1.0
+# Install and load required libraries
+install.packages("dplyr")
+library(dplyr)
 
-RestoreWorkspace: Default
-SaveWorkspace: Default
-AlwaysSaveHistory: Default
+# Read data from CSV file
+data <- read.csv("data/finalTrain.csv")
 
-EnableCodeIndexing: Yes
-UseSpacesForTab: Yes
-NumSpacesForTab: 2
-Encoding: UTF-8
+# Check first few rows of the data
+head(data, 3)
 
-RnwWeave: Sweave
-LaTeX: pdfLaTeX
-.libPaths()
-## dplyr - For data manipulation ----
-if (!is.element("dplyr", installed.packages()[, 1])) {
-  install.packages("dplyr", dependencies = TRUE,
-  repos = "https://cloud.r-project.org")
-}
-require("dplyr")
+# Check rows with missing values in "Delivery_person_Age"
+head(data[is.na(data$Delivery_person_Age)], 3)
 
-if (!is.element("NHANES", installed.packages()[, 1])) {
-  install.packages("NHANES", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-require("NHANES")
+# Check the data types and number of non-null values for each column
+summary(data)
 
-## ggplot2 - For data visualizations using the Grammar for Graphics package ----
-if (!is.element("ggplot2", installed.packages()[, 1])) {
-install.packages("ggplot2", dependencies = TRUE,
-repos = "https://cloud.r-project.org")
-}
-require("ggplot2")
+# Drop columns with no information or unique values
+data <- data %>% select(-Delivery_person_ID, -Delivery_person_ID, -ID, -Time_Orderd, -Time_Order_picked)
 
-## Amelia ----
-if (!is.element("Amelia", installed.packages()[, 1])) {
-  install.packages("Amelia", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-require("Amelia")
+# Check the data types and number of non-null values for each column after dropping columns
+summary(data)
 
-## Mice ----
-if (!is.element("mice", installed.packages()[, 1])) {
-  install.packages("mice", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
-}
-require("mice")
+# Check first few rows of the data after dropping columns
+head(data, 3)
 
-## ggrepel - Additional options for the Grammar for Graphics package ----
-if (!is.element("ggrepel", installed.packages()[, 1])) {
-install.packages("ggrepel", dependencies = TRUE,
-repos = "https://cloud.r-project.org")
-}
-require("ggrepel")
+# Import required libraries
+library(matplotlib.pyplot)
+library(seaborn)
 
-## ggraph - Additional options for the Grammar for Graphics package ----
-if (!is.element("ggraph", installed.packages()[, 1])) {
-install.packages("ggraph", dependencies = TRUE,
-repos = "https://cloud.r-project.org")
-}
-require("ggraph")
+# Define a function to plot histograms with density curves
+histplotcount_func <- function(input_feature, data, no_of_bins) {
+  ggplot(data, aes(x = input_feature)) +
+    geom_histogram(bins = no_of_bins) +
+    stat_density(geom = "line", color = "blue") +
+    labs(title = paste("Distribution of", input_feature), x = input_feature, y = "Frequency") +
+    theme_bw()
 
-## tidytext - For text mining ----
-if (!is.element("tidytext", installed.packages()[, 1])) {
-install.packages("tidytext", dependencies = TRUE,
-repos = "https://cloud.r-project.org")
-}
-require("tidytext")
-
-## tidyr - To tidy messy data ----
-if (!is.element("tidyr", installed.packages()[, 1])) {
-install.packages("tidyr", dependencies = TRUE,
-repos = "https://cloud.r-project.org")
-}
-require("tidyr")
-
-## widyr - To widen, process, and re-tidy a dataset ----
-if (!is.element("widyr", installed.packages()[, 1])) {
-install.packages("widyr", dependencies = TRUE,
-repos = "https://cloud.r-project.org")
-}
-require("widyr")
-
-## gridExtra - to arrange multiple grid-based plots on a page ----
-if (!is.element("gridExtra", installed.packages()[, 1])) {
-install.packages("gridExtra", dependencies = TRUE,
-repos = "https://cloud.r-project.org")
-}
-require("gridExtra")
-
-## knitr - for dynamic report generation ----
-if (!is.element("knitr", installed.packages()[, 1])) {
-install.packages("knitr", dependencies = TRUE,
-repos = "https://cloud.r-project.org")
-}
-require("knitr")
-
-## kableExtra - for nicely formatted output tables ----
-if (!is.element("kableExtra", installed.packages()[, 1])) {
-install.packages("kableExtra", dependencies = TRUE,
-repos = "https://cloud.r-project.org")
-}
-require("kableExtra")
-
-## formattable -  To create a formattable object ----
-# A formattable object is an object to which a formatting function and related
-# attributes are attached.
-if (!is.element("formattable", installed.packages()[, 1])) {
-install.packages("formattable", dependencies = TRUE,
-repos = "https://cloud.r-project.org")
-}
-require("formattable")
-
-## circlize - To create a cord diagram or visualization ----
-# by Gu et al. (2014)
-if (!is.element("circlize", installed.packages()[, 1])) {
-install.packages("circlize", dependencies = TRUE,
-repos = "https://cloud.r-project.org")
-}
-require("circlize")
-
-## memery - For creating data analysis related memes ----
-# The memery package generates internet memes that optionally include a
-# superimposed inset plot and other atypical features, combining the visual
-# impact of an attention-grabbing meme with graphic results of data analysis.
-if (!is.element("memery", installed.packages()[, 1])) {
-install.packages("memery", dependencies = TRUE,
-repos = "https://cloud.r-project.org")
-}
-require("memery")
-
-## magick - For image processing in R ----
-if (!is.element("magick", installed.packages()[, 1])) {
-install.packages("magick", dependencies = TRUE,
-repos = "https://cloud.r-project.org")
-}
-require("magick")
-
-## yarrr - To create a pirate plot ----
-if (!is.element("yarrr", installed.packages()[, 1])) {
-install.packages("yarrr", dependencies = TRUE,
-repos = "https://cloud.r-project.org")
-}
-require("yarrr")
-
-## radarchart - To create interactive radar charts using ChartJS ----
-if (!is.element("radarchart", installed.packages()[, 1])) {
-install.packages("radarchart", dependencies = TRUE,
-repos = "https://cloud.r-project.org")
-}
-require("radarchart")
-
-## igraph - To create ngram network diagrams ----
-if (!is.element("igraph", installed.packages()[, 1])) {
-install.packages("igraph", dependencies = TRUE,
-repos = "https://cloud.r-project.org")
-}
-require("igraph")
-
-## wordcloud2 - For creating wordcloud by using 'wordcloud2.JS ----
-if (!is.element("wordcloud2", installed.packages()[, 1])) {
-install.packages("wordcloud2", dependencies = TRUE,
-repos = "https://cloud.r-project.org")
-}
-require("wordcloud2")
-
-## readr - Load datasets from CSV files ----
-if (!is.element("readr", installed.packages()[, 1])) {
-install.packages("readr", dependencies = TRUE,
-repos = "https://cloud.r-project.org")
-}
-require("readr")
-
-## FactoMineR ----
-if (require("FactoMineR")) {
-  require("FactoMineR")
-} else {
-  install.packages("FactoMineR", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
+  # Show the plot
+  print(ggplot2::last_plot())
 }
 
-## caret ----
-if (require("caret")) {
-  require("caret")
-} else {
-  install.packages("caret", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
+# Plot histogram with density curve for "Delivery_person_Age"
+histplotcount_func("Delivery_person_Age", data, 5)
+
+# Calculate the mean of "Delivery_person_Age" to fill missing values
+mean_age <- mean(data$Delivery_person_Age)
+
+# Fill missing values in "Delivery_person_Age" with the mean
+data$Delivery_person_Age <- replace(data$Delivery_person_Age, is.na(data$Delivery_person_Age), mean_age)
+
+# Check the distribution of "Delivery_person_Ratings"
+data$Delivery_person_Ratings %>% count()
+
+# Remove rows where "Delivery_person_Ratings" is 6
+data <- data %>% filter(Delivery_person_Ratings != 6)
+
+# Plot histogram with density curve for "Delivery_person_Ratings"
+histplotcount_func("Delivery_person_Ratings", data, 5)
+
+# Loop through each column in the DataFrame and print information about each column
+for (i in colnames(data)) {
+  print(paste0("Column Name: ", i))
+  print(paste0("Column Type: ", typeof(data[[i]])))
+  print(rep("=", 64))
+
+  # Print unique values in the column
+  unique_values <- unique(data[[i]])
+  print(unique_values)
+  print(rep("=", 64))
 }
 
-## e1071 ----
-if (require("e1071")) {
-  require("e1071")
-} else {
-  install.packages("e1071", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
+# Count the number of records with zero values in "Delivery_location_latitude"
+count_zero_longitude <- sum(data$Delivery_location_latitude == "0")
+print(paste0("Number of records with Delivery_location_latitude equal to 0: ", count_zero_longitude))
+
+# Count the number of records with zero values in "Restaurant_latitude"
+count_zero_latitude <- sum(data$Restaurant_latitude == 0)
+print(paste0("Number of records with Restaurant_latitude equal to 0: ", count_zero_latitude))
+
+# Count the number of records with zero values in "Restaurant_longitude"
+count_zero_longitude <- sum(data$Restaurant_longitude == 0)
+print(paste0("Number of records with Restaurant_longitude equal to 0: ", count_zero_longitude))
+
+# Plot histogram with density curve for "Restaurant_latitude"
+histplotcount_func("Restaurant_latitude", data, 5)
+
+# Plot histogram with density curve for "Restaurant_longitude"
+histplotcount_func("Restaurant_longitude", data, 5)
+
+# Check the data types and number of non-null values for each column again
+summary(data)
+
+# Calculate the median of "Delivery_location_longitude" to fill missing values
+median_Delivery_location_longitude <- median(data$Delivery_location_longitude)
+
+# Fill missing values in "Delivery_location_longitude" with the median
+data$Delivery_location_longitude <- replace(data$Delivery_location_longitude, is.na(data$Delivery_location_longitude), median_Delivery_location_longitude)
+
+# Calculate the median of "Delivery_location_latitude" to fill missing values
+median_Delivery_location_latitude <- median(data$Delivery_location_latitude)
+
+# Fill missing values in "Delivery_location_latitude" with the median
+data$Delivery_location_latitude <- replace(data$Delivery_location_latitude, is.na(data$Delivery_location_latitude), median_Delivery_location_latitude)
+
+# Check for duplicate rows
+duplicate_rows <- data[duplicated(data)]
+
+# Check the number of rows with and without duplicates
+data.shape
+
+# Calculate the percentage of rows with duplicates
+percentage_duplicates <- (data.shape[0] - without_nan[0]) / data.shape[0] * 100
+print(paste0("Percentage of rows with duplicates: ", round(percentage_duplicates, 2), "%"))
+
+# Calculate the percentage of missing values in the dataset
+missing_values_percentage <- (with_nan[0] - without_nan[0]) / with_nan[0] * 100
+print(paste0("Percentage of missing values in the dataset: ", round(missing_values_percentage, 2), "%"))
+
+# Calculate the percentage of valid data in the dataset
+valid_data_percentage <- 100 - missing_values_percentage
+print(paste0("Percentage of valid data in the dataset: ", round(valid_data_percentage, 2), "%"))
+
+# Calculate the conversion rate
+conversion_rate <- (2938 / 42646) * 100
+print(paste0("Conversion rate: ", round(conversion_rate, 2), "%"))
+
+# Check the data types and number of non-null values for each column again
+summary(data)
+
+# Check the first few rows of the "Order_Date" column
+data[['Order_Date']].head()
+
+# Check the unique values in "Order_Date"
+unique(data$Order_Date)
+
+# Extract the day from the "Order_Date" column and store it in a new column named "Day"
+data["Day"] <- as.Date(data$Order_Date, "%d-%m-%Y") %>% ISOdate() %>% as.numeric()
+
+# Check the first few rows of the data after extracting the day
+data.head()
+
+# Extract the month from the "Order_Date" column and store it in a new column named "Month"
+data["Month"] <- as.Date(data$Order_Date, "%d-%m-%Y") %>% month()
+
+# Extract the year from the "Order_Date" column and store it in a new column named "Year"
+data["Year"] <- as.Date(data$Order_Date, "%d-%m-%Y") %>% year()
+
+# Check the first few rows of the data after extracting the month and year
+data[["Order_Date"]].head()
+
+# Drop the "Order_Date" column since the information has been extracted into separate columns
+data <- data %>% select(-Order_Date)
+
+# Check the first few rows of the data after dropping the "Order_Date" column
+data.head(3)
+
+# Check the data types and number of non-null values for each column again
+summary(data)
+
+# Rename columns for better readability
+names(data) <- c("Delivery_person_ID", "Delivery_person_Ratings", "multiple_deliveries",
+                  "Restaurant_ID", "Restaurant_latitude", "Restaurant_longitude",
+                  "Delivery_location_latitude", "Delivery_location_longitude",
+                  "Road_traffic_density", "Weather_conditions", "Festival", "City",
+                  "Day_Ordered", "Month_Ordered", "Year_Ordered", "Time_taken_min")
+
+# Define a function to segregate categorical and numerical columns
+column_segregator <- function(data, categorical_columns_list, numerical_columns_list) {
+  for (col in colnames(data)) {
+    if (is.character(data[[col]])) {
+      categorical_columns_list <- append(categorical_columns_list, col)
+    } else {
+      numerical_columns_list <- append(numerical_columns_list, col)
+    }
+  }
 }
 
-## factoextra ----
-if (require("factoextra")) {
-  require("factoextra")
-} else {
-  install.packages("factoextra", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
+# Initialize empty lists to store categorical and numerical columns
+categorical_columns <- list()
+numerical_columns <- list()
+
+# Segregate categorical and numerical columns using the custom function
+column_segregator(data, categorical_columns, numerical_columns)
+
+# Print the identified categorical and numerical columns
+print("Categorical Columns:")
+print(categorical_columns)
+print("\nNumerical Columns:")
+print(numerical_columns)
+
+# Describe the categorical columns using summary()
+data[categorical_columns] %>% summary()
+
+# Describe the numerical columns using describe() and transpose the result
+data[numerical_columns] %>% describe() %>% t()
+
+# Check for numeric values in categorical columns
+for (column in categorical_columns) {
+  if (grepl("[0-9]", data[[column]])) {
+    print(paste0("Numeric values found in categorical column:", column))
+  } else {
+    print(paste0("No numeric values found in categorical column:", column))
+  }
 }
 
-## mlbench ----
-if (require("mlbench")) {
-  require("mlbench")
-} else {
-  install.packages("mlbench", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
+# Filter rows that don't contain ":" (i.e., rows with floating-point values) for "Time_Orderd"
+filtered_rows <- data %>% filter(!is.na(Time_Orderd) & !grepl(":", Time_Orderd))
+
+# Sort rows based on "Time_Orderd" column
+sorted_rows <- filtered_rows %>% arrange(Time_Orderd)
+
+# Retrieve only the "Time_Orderd" column values
+result <- data.frame(Time_Orderd = sorted_rows$Time_Orderd)
+
+# Count the occurrences of each unique value in the resulting column
+value_counts <- result$Time_Orderd %>% value_counts()
+
+# Display the value counts
+print(value_counts, "\nSum =", sum(value_counts))
+
+# Filter rows that don't contain ":" (i.e., rows with floating-point values) for "Time_Order_picked"
+filtered_rows <- data %>% filter(!is.na(Time_Order_picked) & !grepl(":", Time_Order_picked))
+
+# Sort rows based on "Time_Order_picked" column
+sorted_rows <- filtered_rows %>% arrange(Time_Order_picked)
+
+# Retrieve only the "Time_Order_picked" column values
+result <- data.frame(Time_Order_picked = sorted_rows$Time_Order_picked)
+
+# Count the occurrences of each unique value in the resulting column
+value_counts <- result$Time_Order_picked %>% value_counts()
+
+# Display the value counts
+print(value_counts, "\nSum =", sum(value_counts))
+
+# Calculate the correlation matrix using only numerical columns
+correlation_matrix <- cor(data[numerical_columns], method = "spearman")
+
+# Set up the figure and axes
+plot(correlation_matrix, col = colorRamp("coolwarm"), main = "Correlation Heatmap")
+
+# Add a title
+text(0, 0.5, "Correlation Matrix", cex = 0.8, adj = c(0.5, 0.5))
+
+# Show the plot
+plot(correlation_matrix)
+
+# Print the categorical columns
+print("Categorical Columns:")
+print(categorical_columns)
+
+# Define a function to create bar plots with standard deviation error bars
+barplot_func <- function(data, input_feature, output_feature) {
+  ggplot(data, aes_string(x = input_feature, y = output_feature)) +
+    geom_bar() +
+    geom_errorbar(aes(ymin = output_feature - sd(output_feature), ymax = output_feature + sd(output_feature))) +
+    labs(title = paste(output_feature, "by", input_feature), x = input_feature, y = output_feature) +
+    theme_bw()
+
+  print("\n")
+  print(ggplot2::last_plot())
 }
 
-## e1071 ----
-if (require("e1071")) {
-  require("e1071")
-} else {
-  install.packages("e1071", dependencies = TRUE,
-                   repos = "https://cloud.r-project.org")
+# Create a bar plot of "Time_taken(min)" by "Weather_conditions"
+barplot_func(data, "Weather_conditions", "Time_taken_min")
+
+# Get unique values in "Weather_conditions"
+unique_weather_conditions <- unique(data$Weather_conditions)
+
+# Create a dictionary to map weather conditions to numerical values
+Weather_conditions_map <- c(
+  Fog = 1,
+  Cloudy = 2,
+  Windy = 3,
+  Sandstorms = 4,
+  Stormy = 5,
+  Sunny = 6
+)  # (Least likely to cause delays)
+
+# Replace weather conditions with corresponding numerical values
+data$Weather_conditions <- sapply(data$Weather_conditions, function(x) Weather_conditions_map[[x]])
+
+# Get unique values in "Road_traffic_density"
+unique_traffic_density <- unique(data$Road_traffic_density)
+
+# Create a dictionary to map traffic density to numerical values
+Road_traffic_density_map <- c(
+  Jam = 1,
+  High = 2,
+  Medium = 3,
+  Low = 4
+)
+
+# Replace traffic density with corresponding numerical values
+data$Road_traffic_density <- sapply(data$Road_traffic_density, function(x) Road_traffic_density_map[[x]])
+
+# Create a bar plot of "Time_taken(min)" by "Type_of_vehicle"
+barplot_func(data, "Type_of_vehicle", "Time_taken_min")
+
+# Get unique values in "Type_of_vehicle"
+unique_vehicle_types <- unique(data$Type_of_vehicle)
+
+# Create a dictionary to map vehicle types to numerical values
+Type_of_vehicle_map <- c(
+  motorcycle = 1,
+  scooter = 2,
+  electric_scooter = 3
+)
+
+# Replace vehicle types with corresponding numerical values
+data$Type_of_vehicle <- sapply(data$Type_of_vehicle, function(x) Type_of_vehicle_map[[x]])
+
+# Create a bar plot of "Time_taken(min)" by "City"
+barplot_func(data, "City", "Time_taken_min")
+
+# Get unique values in "City"
+unique_cities <- unique(data$City)
+
+# Create a dictionary to map city types to numerical values
+City_map <- c(
+  Urban = 3,
+  Metropolitian = 2,
+  Semi_Urban = 1
+)
+
+# Replace city types with corresponding numerical values
+data$City <- sapply(data$City, function(x) City_map[[x]])
+
+# Create a list of the mapping dictionaries' keys
+mapping_dicts_keys <- names(mapping_dicts)
+
+# Map values using the mapping dictionaries
+for (column in mapping_dicts_keys) {
+  data[[column]] <- as.numeric(sapply(data[[column]], function(x) mapping_dicts[[column]][[x]]))
 }
 
-# The following defines a blue-grey colour scheme for the visualizations:
-## shades of blue and shades of grey
-blue_grey_colours_11 <- c("#27408E", "#304FAF", "#536CB5", "#6981c7", "#8da0db",
-                          "#dde5ec", "#c8c9ca", "#B9BCC2", "#A7AAAF", "#888A8E",
-                          "#636569")
+# Define a function to perform one-hot encoding for a categorical column in a DataFrame
+one_hot_encoder_func <- function(data, column_name) {
+  # Validate inputs
+  if (!is.data.frame(data)) {
+    stop("Input 'data' must be a data.frame.")
+  }
 
-blue_grey_colours_6 <- c("#27408E", "#304FAF", "#536CB5",
-                         "#B9BCC2", "#A7AAAF", "#888A8E")
+  if (!column_name %in% colnames(data)) {
+    stop(paste0("Column '", column_name, "' not found in the data.frame."))
+  }
 
-blue_grey_colours_4 <- c("#27408E", "#536CB5",
-                         "#B9BCC2", "#888A8E")
+  # Perform one-hot encoding
+  one_hot_encoded <- data[[column_name]] %>% as.factor() %>% levels() %>% do.call(data.frame, .) %>% setNames(paste0(column_name, "_"))
 
-blue_grey_colours_3 <- c("#6981c7", "#304FAF", "#888A8E")
+  # Concatenate the one-hot encoded columns with the original DataFrame
+  data <- data %>% cbind(one_hot_encoded)
 
-blue_grey_colours_2 <- c("#27408E",
-                         "#888A8E")
+  # Drop the original column
+  data <- data %>% select(-column_name)
 
-blue_grey_colours_1 <- c("#6981c7")
-
-# Custom theme for visualizations
-blue_grey_theme <- function() {
-  theme(
-    axis.ticks = element_line(
-                              linewidth = 1, linetype = "dashed",
-                              lineend = NULL, color = "#dfdede",
-                              arrow = NULL, inherit.blank = FALSE),
-    axis.text = element_text(
-                             face = "bold", color = "#3f3f41",
-                             size = 12, hjust = 0.5),
-    axis.title = element_text(face = "bold", color = "#3f3f41",
-                              size = 14, hjust = 0.5),
-    plot.title = element_text(face = "bold", color = "#3f3f41",
-                              size = 16, hjust = 0.5),
-    panel.grid = element_line(
-                              linewidth = 0.1, linetype = "dashed",
-                              lineend = NULL, color = "#dfdede",
-                              arrow = NULL, inherit.blank = FALSE),
-    panel.background = element_rect(fill = "#f3eeee"),
-    legend.title = element_text(face = "plain", color = "#3f3f41",
-                                size = 12, hjust = 0),
-    legend.position = "right"
-  )
+  return(data)
 }
 
-# Customize the text tables for consistency using HTML formatting
-kable_theme <- function(dat, caption) {
-  kable(dat, "html", escape = FALSE, caption = caption) %>%
-    kable_styling(bootstrap_options = c("striped", "condensed", "bordered"),
-                  full_width = FALSE)
+# Check the first few rows of the data
+data[1:3,]
+
+# Get unique values in "Type_of_order"
+unique_order_types <- unique(data$Type_of_order)
+
+# Perform one-hot encoding for "Type_of_order"
+data <- one_hot_encoder_func(data, "Type_of_order")
+
+# Perform one-hot encoding for "Festival"
+data <- one_hot_encoder_func(data, "Festival")
+
+# Check the first few rows of the data after one-hot encoding
+data[1:3,]
+
+# Define a function to create a line plot with a KDE curve
+lineplot_with_kde <- function(input_feature, output_feature, data) {
+  ggplot(data, aes_string(x = input_feature, y = output_feature)) +
+    geom_line(color = "blue", label = "Line Plot") +
+    geom_density2d(cmap = "Reds", label = "KDE", shade = TRUE) +
+    labs(title = paste("Line Plot with KDE of", output_feature, "based on", input_feature), x = input_feature, y = output_feature) +
+    theme_bw()
+
+  print("\n")
+  print(ggplot2::last_plot())
 }
 
-# STEP 3. Load the Dataset ----
-food_delivery_data <-
-  readr::read_csv(
-                  "data/food_delivery_data.CSV", # nolint
-                  )
+# Target column for line plots
+target_col <- "Time_taken_min"
 
-View(food_delivery_data)
+# Create line plots with KDE curves for various features
+lineplot_with_kde("Delivery_person_Age", target_col, data)
+lineplot_with_kde("Delivery_person_Ratings", target_col, data)
+lineplot_with_kde("Weather_conditions", target_col, data)
+lineplot_with_kde("Vehicle_condition", target_col, data)
 
-str(food_delivery_data)
+# Print the Weather_conditions_map dictionary
+print(Weather_conditions_map)
 
-# Dimensions
-dim(food_delivery_data)
+# Calculate the correlation matrix using only numerical columns
+correlation_matrix <- cor(data[numerical_columns], method = "spearman")
 
-# Data Types
-sapply(food_delivery_data, class)
-glimpse(food_delivery_data)
+# Set up the figure and axes
+plot(correlation_matrix, col = colorRamp("coolwarm"), main = "Correlation Heatmap")
 
-# Summary of each variable
-summary(food_delivery_data)
+# Add a title
+text(0, 0.5, "Correlation Matrix", cex = 0.8, adj = c(0.5, 0.5))
 
-# STEP 4. Create a subset of the data using the "dplyr" package ----
+# Show the plot
+plot(correlation_matrix)
 
-#high traffic deliveries
-food_delivery_data_hightraffic <- food_delivery_data %>% filter(Road_traffic_density == "High")
-summary(food_delivery_data_hightraffic)
+# Create bar plots for additional features
+barplot_func(data, "multiple_deliveries", target_col)
+barplot_func(data, "Festival_Yes", target_col)
+barplot_func(data, "City", target_col)
 
-# meal order types
-food_delivery_data_meals <- food_delivery_data %>% filter(Type_of_order == "Meal")
-summary(food_delivery_data_meals)
+# Print the City_map dictionary
+print(City_map)
 
-# Average delivery person ratings
-avg_ratings <- food_delivery_data %>% 
-  group_by(Delivery_person_Age) %>% 
-  summarize(avg_ratings = mean(Delivery_person_Ratings, na.rm = TRUE))
- print(avg_ratings)
+# Create bar plots for relationships between features
+barplot_func(data, "Delivery_person_Ratings", "Delivery_person_Age")
+barplot_func(data, "multiple_deliveries", "Delivery_person_Age")
+barplot_func(data, "multiple_deliveries", "Road_traffic_density")
 
-ggplot(na.omit(food_delivery_data), aes(x = Delivery_person_Age, y = Delivery_person_Ratings, fill = Delivery_person_Age)) +
-  geom_boxplot() +
-  labs(title = "Age vs. Rating",
-       x = "Age",
-       y = "Ratings",
-       fill = "Age") +
-  theme_minimal()
+# Print the Road_traffic_density_map dictionary
+print(Road_traffic_density_map)
 
+# Create additional bar plots for relationships between features
+barplot_func(data, "Festival_Yes", "Road_traffic_density")
+barplot_func(data, "City", "Road_traffic_density")
 
+# Print the City_map dictionary
+print(City_map)
 
-# Remove duplicates
-food_delivery_data <- unique(food_delivery_data)
+# Create bar plots for vehicle-related relationships
+barplot_func(data, "Type_of_vehicle", "Vehicle_condition")
+barplot_func(data, "Festival_Yes", "multiple_deliveries")
+barplot_func(data, "Festival_Yes", "multiple_deliveries")
 
-# Standardize text in a column
-food_delivery_data$Weatherconditions <- tolower(food_delivery_data$Weatherconditions)
-food_delivery_data$Weatherconditions <- trimws(food_delivery_data$Weatherconditions)
+# Define a function to create custom pair bar plots
+custom_pairbarplot <- function(data, columns_to_compare, input_column_type, output_column, type_of_plot) {
+  # Grouping and summing each order type based on festival status
+  grouped <- data %>% group_by(output_column) %>% summarise(across(columns_to_compare, sum))
 
-str(food_delivery_data)
+  # Plotting the bar plots
+  ggplot(grouped, aes_string(x = output_column, y = !columns_to_compare[1])) +
+    geom_bar() +
+    labs(title = paste0("Comparison of", input_column_type, "for", output_column, "Status"), x = output_column, y = "Sum Count") +
+    theme_bw()
 
-# data imputation
-# Create a mice imputation model
-imputation_model <- mice(food_delivery_data, method = "pmm", m = 5)
+  print("\n")
+  print(ggplot2::last_plot())
+}
 
-# Perform the imputation
-food_delivery_data_imputed <- complete(imputation_model)
+# Define variables for first bar plot
+columns_to_compare <- c("Type_of_order_Buffet", "Type_of_order_Drinks", "Type_of_order_Meal", "Type_of_order_Snack")
+input_column_type <- "Order_Type"
+output_column <- "City"
+type_of_plot <- "bar"
 
-# View the imputed data
-head(food_delivery_data_imputed)
+# Create a custom pair bar plot
+custom_pairbarplot(data, columns_to_compare, input_column_type, output_column, type_of_plot)
 
+# Print the City_map dictionary
+print(City_map)
 
+# Define variables for second bar plot
+columns_to_compare <- c("Type_of_order_Buffet", "Type_of_order_Drinks", "Type_of_order_Meal", "Type_of_order_Snack")
+input_column_type <- "Order_Type"  # Update to reflect the actual x-axis label you want
+output_column <- "Festival_Yes"
+type_of_plot <- "bar"
+
+# Create a custom pair bar plot
+custom_pairbarplot(data, columns_to_compare, input_column_type, output_column, type_of_plot)
+
+# Calculate the correlation matrix
+correlation_matrix <- cor(data)
+
+# Set up the figure and axes
+plot(correlation_matrix, col = colorRamp("coolwarm"), main = "Correlation Heatmap")
+
+# Add a title
+text(0, 0.5, "Correlation Matrix", cex = 0.8, adj = c(0.5, 0.5))
+
+# Show the plot
+plot(correlation_matrix)
+
+# Get unique values in "City"
+unique_cities <- unique(data$City)
+
+# Save the DataFrame as a CSV file
+data %>% write_csv("cleaned_data.csv", row.names = FALSE)

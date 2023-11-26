@@ -203,6 +203,22 @@ if (require("factoextra")) {
                    repos = "https://cloud.r-project.org")
 }
 
+## mlbench ----
+if (require("mlbench")) {
+  require("mlbench")
+} else {
+  install.packages("mlbench", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## e1071 ----
+if (require("e1071")) {
+  require("e1071")
+} else {
+  install.packages("e1071", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
 # The following defines a blue-grey colour scheme for the visualizations:
 ## shades of blue and shades of grey
 blue_grey_colours_11 <- c("#27408E", "#304FAF", "#536CB5", "#6981c7", "#8da0db",
@@ -298,8 +314,18 @@ ggplot(na.omit(food_delivery_data), aes(x = Delivery_person_Age, y = Delivery_pe
        fill = "Age") +
   theme_minimal()
 
-# data imputation
 
+
+# Remove duplicates
+food_delivery_data <- unique(food_delivery_data)
+
+# Standardize text in a column
+food_delivery_data$Weatherconditions <- tolower(food_delivery_data$Weatherconditions)
+food_delivery_data$Weatherconditions <- trimws(food_delivery_data$Weatherconditions)
+
+str(food_delivery_data)
+
+# data imputation
 # Create a mice imputation model
 imputation_model <- mice(food_delivery_data, method = "pmm", m = 5)
 
@@ -308,3 +334,5 @@ food_delivery_data_imputed <- complete(imputation_model)
 
 # View the imputed data
 head(food_delivery_data_imputed)
+
+

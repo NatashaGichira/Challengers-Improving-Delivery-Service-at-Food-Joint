@@ -2,6 +2,8 @@
 install.packages("dplyr")
 library(dplyr)
 
+install.packages("ggplot2")
+
 # Read data from CSV file
 data <- read.csv("data/finalTrain.csv")
 
@@ -489,3 +491,284 @@ unique_cities <- unique(data$City)
 
 # Save the DataFrame as a CSV file
 data %>% write_csv("cleaned_data.csv", row.names = FALSE)
+
+#training the model
+
+# Load necessary libraries
+library(dplyr)
+library(ggplot2)
+
+# Read the data from CSV file
+data <- read.csv("data/finalTrain.csv")
+
+# Head of the data
+head(data, 3)
+
+# Drop unnecessary columns
+data <- data %>%
+  select(-ID) %>%
+  select(-Delivery_person_ID) %>%
+  select(-Time_Orderd) %>%
+  select(-Time_Order_picked)
+
+# Head of the modified data
+head(data, 3)
+
+# Rename the column "Time_taken (min)" to "Time_taken_min"
+data <- rename(data, Time_taken_min = "Time_taken (min)")
+
+# Separate features (X) and target variable (y)
+X <- select(data, -Time_taken_min)
+y <- select(data, Time_taken_min)
+
+# Head of the features (X)
+head(X, 3)
+
+# Head of the target variable (y)
+head(y, 3)
+
+# Convert 'Order_Date' column to DateTime format
+X$Order_Date <- as.Date(X$Order_Date, format = "%d-%m-%Y")
+
+# Extract Day, Month, and Year from 'Order_Date'
+X$Day <- as.day(X$Order_Date)
+X$Month <- as.month(X$Order_Date)
+X$Year <- as.year(X$Order_Date)
+
+# Drop 'Order_Date' column
+X <- X %>% select(-Order_Date)
+
+# Rename columns
+X <- rename(X, Day = Day_Ordered, Month = Month_Ordered, Year = Year_Ordered)
+
+# Identify categorical, numerical, and datetime columns
+categorical_columns <- colnames(X)[sapply(X, is.character)]
+numerical_columns <- colnames(X)[!sapply(X, is.character)]
+datetime_columns <- colnames(X)[sapply(X, is.Date)]
+
+# Print categorical, numerical, and datetime columns
+cat("Categorical columns:", categorical_columns, "\n")
+cat("Numerical columns:", numerical_columns, "\n")
+cat("Datetime columns:", datetime_columns, "\n")
+
+# Import necessary libraries for handling missing values, feature scaling, ordinal encoding, and one-hot encoding
+library(impute)
+library(scales)
+library(caret)
+library(dplyr)
+
+# Identify categorical columns with missing values
+cat_col_null_list <- list()
+for (col in categorical_columns) {
+  if (sum(is.na(X[[col]])) > 0) {
+    cat_col_null_list[[length(cat_col_null_list) + 1]] <- paste(col, "=", sum(is.na(X[[col]])))
+  }
+}
+
+# Identify numerical columns with missing values
+num_col_null_list <- list()
+for (col in numerical_columns) {
+  if (sum(is.na(X[[col]])) > 0) {
+    num_col_null_list[[length(num_col_null_list) + 1]] <- paste(col, "=", sum(is.na(X[[col]])))
+  }
+}
+
+# Print categorical columns with missing values
+cat("Categorical columns with missing values:", cat_col_null_list, "\n")
+
+# Calculate the sum of missing values in categorical columns
+null_sum_catcols <- sum(sapply(cat_col_null_list, function(x) { as.numeric(sub("=.*", "", x)) }))
+print("Sum of missing values in categorical columns:", null_sum_catcols)
+
+# Print numerical columns with missing values
+cat("Numerical columns with missing values:", num_col_null_list, "\n")
+
+# Calculate the sum of missing values in numerical columns
+null_sum_numcols <- sum(sapply(num_col_null_list, function(x) { as.numeric(sub("=.*", "", x)) }))
+print("Sum of missing values in numerical columns:", null_sum_numcols)
+
+# Calculate the total number of missing values
+total_null_values <- null_sum_catcols + null_sum_numcols
+print("Total number of missing values:", total_null_values)
+
+# Print the shape of the X dataset
+print(dim(X))
+
+# Define custom rankings for each ordinal feature
+Weather_conditions_cat <- c("Sunny", "Stormy", "Sandstorms", "Windy", "Cloudy", "Fog", "nan")
+Road_traffic_density_cat <- c("Low", "Medium", "High", "Jam", "nan")
+City_cat <- c("Urban", "Metropolitan", "Semi-Urban", "nan")
+
+Type_of_order_cat <- c("Buffet", "Drinks", "Meal", "Snack")
+Type_of_vehicle_cat <- c("bicycle", "electric_scooter", "motorcycle", "scooter")
+Festival_cat <- c("No", "Yes", "nan")
+
+# Identify numerical, categorical ordinal, and categorical one-hot encoded columns
+numerical_columns <- c("Delivery_person_Age", "Delivery_person_Ratings", "Restaurant_latitude", "Restaurant_longitude", "Delivery_location_latitude", "Delivery_location_longitude", "Vehicle_condition", "multiple_deliveries", "Day_Ordered", "Month_Ordered", "Year_Ordered")
+cat_ordinal_columns <- c("Weather_conditions", "Road_traffic_density", "City")
+cat_ohe_columns <- c("Type_of_order", "Type_of_vehicle", "Festival")
+
+# Create pipelines for numerical, categorical ordinal, and categorical one-hot encoded features
+num_pipeline <- pipeline(
+  steps = list(
+    imputer = simpleImputer(strategy = "median"),  # Impute missing values with median
+    scaler_numerical = StandardScaler(with_mean = FALSE)  # Standardize and scale numerical features
+  )
+)
+
+cat_pipeline_ordinal <- pipeline(
+  steps = list(
+    imputer = simpleImputer(strategy = "most_frequent"),  # Impute missing values with most frequent category
+    ordinal_encoder = OrdinalEncoder(categories = list(Weather_conditions_cat, Road_traffic_density_cat, City_cat)),  # Encode ordinal categories
+    scaler_ordinal = StandardScaler(with_mean = FALSE)  # Standardize and scale ordinal features
+  )
+)
+
+cat_pipeline_ohe <- pipeline(
+  steps = list(
+    imputer = simpleImputer(strategy = "most_frequent"),  # Impute missing values with most frequent category
+    onehotencoder = OneHotEncoder(categories = list(Type_of_order_cat, Type_of_vehicle_cat, Festival_cat)),  # One-hot encode categorical features
+    scaler_ohe = StandardScaler(with_mean = FALSE)  # Standardize and scale one-hot encoded features
+  )
+)
+
+# Combine pipelines for numerical, categorical ordinal, and categorical one-hot encoded features using column transformer
+pre_processor <- ColumnTransformer(
+  transformers = list(
+    num_pipeline = num_pipeline, numerical_columns,
+    cat_pipeline_ordinal = cat_pipeline_ordinal, cat_ordinal_columns,
+    cat_pipeline_ohe = cat_pipeline_ohe, cat_ohe_columns
+  ),
+  remainder = "passthrough"  # Preserve columns that are not preprocessed
+)
+
+# Split the data into training and testing sets
+X_train <- X
+y_train <- y
+
+X_test <- X
+y_test <- y
+
+# Preprocess the training and testing data using the column transformer
+X_train_preprocessed <- preprocessor %>% fit_transform(X_train)
+X_test_preprocessed <- preprocessor %>% transform(X_test)
+
+# Convert the preprocessed data back to data frames with column names
+X_train_preprocessed <- as.data.frame(X_train_preprocessed, columns = preprocessor$get_feature_names_out())
+X_test_preprocessed <- as.data.frame(X_test_preprocessed, columns = preprocessor$get_feature_names_out())
+
+# Head of the preprocessed training data
+head(X_train_preprocessed, 3)
+
+# Head of the preprocessed testing data
+head(X_test_preprocessed, 3)
+
+# Sample 5 rows from the 'cat_pipeline_ohe__Type_of_order' columns
+X_train_preprocessed[c("cat_pipeline_ohe__Type_of_order_Snack", "cat_pipeline_ohe__Type_of_order_Buffet", "cat_pipeline_ohe__Type_of_order_Drinks", "cat_pipeline_ohe__Type_of_order_Meal")] %>% sample_n(5)
+
+# Import necessary libraries for linear regression models and evaluation metrics
+library(lm)
+library(mlbench)
+
+# Create linear regression models
+linear_regression <- lm(Time_taken_min ~ ., data = X_train_preprocessed)
+ridge_regression <- lmridge(Time_taken_min ~ ., data = X_train_preprocessed)
+elastic_net_regression <- glmnet(Time_taken_min ~ ., data = X_train_preprocessed, lambda = 1)
+lasso_regression <- glmnet(Time_taken_min ~ ., data = X_train_preprocessed, lambda = 0.001)
+
+# Evaluate the performance of each model on the training data
+train_predictions <- predict(linear_regression, X_train_preprocessed)
+ridge_train_predictions <- predict(ridge_regression, X_train_preprocessed)
+elastic_net_train_predictions <- predict(elastic_net_regression, X_train_preprocessed)
+lasso_train_predictions <- predict(lasso_regression, X_train_preprocessed)
+
+train_r2_score <- r2(y_train, train_predictions)
+ridge_train_r2_score <- r2(y_train, ridge_train_predictions)
+elastic_net_train_r2_score <- r2(y_train, elastic_net_train_predictions)
+lasso_train_r2_score <- r2(y_train, lasso_train_predictions)
+
+train_mae_score <- mae(y_train, train_predictions)
+ridge_train_mae_score <- mae(y_train, ridge_train_predictions)
+elastic_net_train_mae_score <- mae(y_train, elastic_net_train_predictions)
+lasso_train_mae_score <- mae(y_train, lasso_train_predictions)
+
+train_mse_score <- mse(y_train, train_predictions)
+ridge_train_mse_score <- mse(y_train, ridge_train_predictions)
+elastic_net_train_mse_score <- mse(y_train, elastic_net_train_predictions)
+lasso_train_mse_score <- mse(y_train, lasso_train_predictions)
+
+# Print the evaluation metrics for each model on the training data
+print("Training R^2 Score:")
+print(train_r2_score)
+print(ridge_train_r2_score)
+print(elastic_net_train_r2_score)
+print(lasso_train_r2_score)
+
+print("Training MAE Score:")
+print(train_mae_score)
+print(ridge_train_mae_score)
+print(elastic_net_train_mae_score)
+print(lasso_train_mae_score)
+
+print("Training MSE Score:")
+print(train_mse_score)
+print(ridge_train_mse_score)
+print(elastic_net_train_mse_score)
+print(lasso_train_mse_score)
+
+# Print the coefficients and intercept of the linear regression model
+print("Coefficients:")
+print(coef(linear_regression))
+
+print("Intercept:")
+print(intercept(linear_regression))
+
+# Define a function to evaluate model performance
+evaluate_model <- function(true, predicted) {
+  mae <- mean(abs(true - predicted))
+  mse <- mean((true - predicted)^2)
+  rmse <- sqrt(mse)
+  r2_square <- r2(true, predicted)
+  return(mae, rmse, r2_square)
+}
+
+# Create a dictionary of regression models
+models <- list(
+  LinearRegression = lm(Time_taken_min ~ ., data = X_train_preprocessed),
+  Lasso = glmnet(Time_taken_min ~ ., data = X_train_preprocessed, lambda = 0.01),
+  Ridge = lmridge(Time_taken_min ~ ., data = X_train_preprocessed),
+  ElasticNet = glmnet(Time_taken_min ~ ., data = X_train_preprocessed, lambda = 1)
+)
+
+# Initialize empty lists to store model names and R-squared scores
+model_list <- list()
+r2_list <- list()
+
+# Evaluate each model on the testing data
+for (model_name in names(models)) {
+  model <- models[[model_name]]
+
+  # Make predictions
+  y_pred <- predict(model, X_test_preprocessed)
+
+  # Calculate evaluation metrics
+  mae, rmse, r2_square <- evaluate_model(y_test, y_pred)
+
+  # Print model information
+  cat(model_name, "\n")
+  cat("Model Training Performance\n")
+  cat("RMSE: ", rmse, "\n")
+  cat("MAE: ", mae, "\n")
+  cat("R2 Score: ", round(r2_square * 100, 2), "%\n")
+  cat("--------------------------------------------------------------------\n")
+
+  # Append model name and R-squared score to lists
+  model_list[[length(model_list) + 1]] <- model_name
+  r2_list[[length(r2_list) + 1]] <- r2_square
+}
+
+# Print the list of models
+print(model_list)
+
+# Print the data information
+print(summary(data))

@@ -3,6 +3,7 @@ install.packages("dplyr")
 library(dplyr)
 
 install.packages("ggplot2")
+library(ggplot2)
 
 # Read data from CSV file
 data <- read.csv("data/finalTrain.csv")
@@ -25,9 +26,6 @@ summary(data)
 # Check first few rows of the data after dropping columns
 head(data, 3)
 
-# Import required libraries
-library(matplotlib.pyplot)
-library(seaborn)
 
 # Define a function to plot histograms with density curves
 histplotcount_func <- function(input_feature, data, no_of_bins) {

@@ -1,88 +1,129 @@
-# Model Training Process
+Certainly! Here's the continuous R code:
 
-## Introduction
-This document provides an overview of the process involved in training a machine learning model for predicting delivery time in the context of a food delivery service. The model is trained using the R programming language and leverages the `glmnet` package.
-
-## Steps
-
-### 1. Load Libraries
-```R
-library(glmnet)
+```r
+# Install and load required libraries
+install.packages("dplyr")
 library(dplyr)
-library(readr)
-library(lubridate)
-library(caret)
+
+install.packages("ggplot2")
 library(ggplot2)
-library(tidyverse)
-library(fastDummies)
-library(corrplot)
-library(dplyr)
-library(workflows)
-library(recipes)
-library(yardstick)
 
-### 2. Load Dataset
+# Read data from CSV file
+data <- read.csv("data/finalTrain.csv")
 
-# Read CSV file into a data frame
-data <- read_csv("data/finalTrain.csv")
+# Check first few rows of the data
+head(data, 3)
 
-### 3. Data Preprocessing
+# Check rows with missing values in "Delivery_person_Age"
+head(data[is.na(data$Delivery_person_Age)], 3)
 
-# Identify numeric features
-numeric_features <- sapply(X, is.numeric)
+# Check the data types and number of non-null values for each column
+summary(data)
 
-# Create a pre-processing recipe
-preprocess_recipe <- preProcess(X, method = c("medianImpute", "center", "scale"), y = TRUE)
+# Drop columns with no information or unique values
+data <- data %>% select(-Delivery_person_ID, -Delivery_person_ID, -ID, -Time_Orderd, -Time_Order_picked)
 
-# Apply the recipe to the data
-preprocessed_data <- predict(preprocess_recipe, newdata = X)
+# Check the data types and number of non-null values for each column after dropping columns
+summary(data)
 
-# Combine preprocessed numerical and categorical data
-preprocessed_data <- cbind(preprocessed_data, y)
+# Check first few rows of the data after dropping columns
+head(data, 3)
 
+# Define a function to plot histograms with density curves
+histplotcount_func <- function(input_feature, data, no_of_bins) {
+  ggplot(data, aes(x = input_feature)) +
+    geom_histogram(bins = no_of_bins) +
+    stat_density(geom = "line", color = "blue") +
+    labs(title = paste("Distribution of", input_feature), x = input_feature, y = "Frequency") +
+    theme_bw()
 
-### 4. Fit the glmnet model
-model <- glmnet(X_train, y_train)
-
-### 5. Model evaluation
-
-for (i in seq_along(models)) {
-  model <- models[[i]]
-
-  # Ensure that y_test contains the column "y_test"
-  if ("y_test" %in% colnames(y_test)) {
-    # Make predictions
-    y_pred <- predict(model, newdata = X_test)
-
-    # Combine true values and predicted values
-    results <- data.frame(True = y_test$y_test, Pred = y_pred)
-
-    # Remove rows with missing values
-    results <- na.omit(results)
-
-    # Evaluate the model
-    metrics <- evaluate_model(results$True, results$Pred)
-
-    # Print results
-    cat(names(models)[i], "\n")
-    cat("Model Training Performance\n")
-    cat("RMSE: ", metrics["RMSE"], "\n")
-    cat("MAE: ", metrics["MAE"], "\n")
-    cat("R2 Score: ", metrics["R2_Square"] * 100, "\n")
-    cat("=" * 100, "\n")
-
-    # Store model name and R2 score
-    model_list[i] <- names(models)[i]
-    r2_list[i] <- metrics["R2_Square"]
-  } else {
-    cat("Column 'y_test' not found in y_test.\n")
-  }
+  # Show the plot
+  print(ggplot2::last_plot())
 }
 
-# 6. Save the trained model for future use
-saveRDS(model, "linear_regression_model.rds")
+# Plot histogram with density curve for "Delivery_person_Age"
+histplotcount_func("Delivery_person_Age", data, 5)
 
+# Calculate the mean of "Delivery_person_Age" to fill missing values
+mean_age <- mean(data$Delivery_person_Age)
 
-## Conclusion
+# Fill missing values in "Delivery_person_Age" with the mean
+data$Delivery_person_Age <- replace(data$Delivery_person_Age, is.na(data$Delivery_person_Age), mean_age)
 
-#The model training process involves loading data, preprocessing, training the model, evaluating its performance, and saving it for deployment. This trained model can be used to predict delivery times in real-world scenarios.
+# Check the distribution of "Delivery_person_Ratings"
+data$Delivery_person_Ratings %>% count()
+
+# Remove rows where "Delivery_person_Ratings" is 6
+data <- data %>% filter(Delivery_person_Ratings != 6)
+
+# Plot histogram with density curve for "Delivery_person_Ratings"
+histplotcount_func("Delivery_person_Ratings", data, 5)
+
+# Loop through each column in the DataFrame and print information about each column
+for (i in colnames(data)) {
+  print(paste0("Column Name: ", i))
+  print(paste0("Column Type: ", typeof(data[[i]])))
+  print(rep("=", 64))
+
+  # Print unique values in the column
+  unique_values <- unique(data[[i]])
+  print(unique_values)
+  print(rep("=", 64))
+}
+
+# Count the number of records with zero values in "Delivery_location_latitude"
+count_zero_longitude <- sum(data$Delivery_location_latitude == "0")
+print(paste0("Number of records with Delivery_location_latitude equal to 0: ", count_zero_longitude))
+
+# Count the number of records with zero values in "Restaurant_latitude"
+count_zero_latitude <- sum(data$Restaurant_latitude == 0)
+print(paste0("Number of records with Restaurant_latitude equal to 0: ", count_zero_latitude))
+
+# Count the number of records with zero values in "Restaurant_longitude"
+count_zero_longitude <- sum(data$Restaurant_longitude == 0)
+print(paste0("Number of records with Restaurant_longitude equal to 0: ", count_zero_longitude))
+
+# Plot histogram with density curve for "Restaurant_latitude"
+histplotcount_func("Restaurant_latitude", data, 5)
+
+# Plot histogram with density curve for "Restaurant_longitude"
+histplotcount_func("Restaurant_longitude", data, 5)
+
+# Check the data types and number of non-null values for each column again
+summary(data)
+
+# Calculate the median of "Delivery_location_longitude" to fill missing values
+median_Delivery_location_longitude <- median(data$Delivery_location_longitude)
+
+# Fill missing values in "Delivery_location_longitude" with the median
+data$Delivery_location_longitude <- replace(data$Delivery_location_longitude, is.na(data$Delivery_location_longitude), median_Delivery_location_longitude)
+
+# Calculate the median of "Delivery_location_latitude" to fill missing values
+median_Delivery_location_latitude <- median(data$Delivery_location_latitude)
+
+# Fill missing values in "Delivery_location_latitude" with the median
+data$Delivery_location_latitude <- replace(data$Delivery_location_latitude, is.na(data$Delivery_location_latitude), median_Delivery_location_latitude)
+
+# Check for duplicate rows
+duplicate_rows <- data[duplicated(data)]
+
+# Check the number of rows with and without duplicates
+data.shape
+
+# Calculate the percentage of rows with duplicates
+percentage_duplicates <- (data.shape[0] - without_nan[0]) / data.shape[0] * 100
+print(paste0("Percentage of rows with duplicates: ", round(percentage_duplicates, 2), "%"))
+
+# Calculate the percentage of missing values in the dataset
+missing_values_percentage <- (with_nan[0] - without_nan[0]) / with_nan[0] * 100
+print(paste0("Percentage of missing values in the dataset: ", round(missing_values_percentage, 2), "%"))
+
+# Calculate the percentage of valid data in the dataset
+valid_data_percentage <- 100 - missing_values_percentage
+print(paste0("Percentage of valid data in the dataset: ", round(valid_data_percentage, 2), "%"))
+
+# Calculate the conversion rate
+conversion_rate <- (2938 / 42646) * 100
+print(paste0("Conversion rate: ", round(conversion_rate, 2), "%"))
+
+# Check the data types

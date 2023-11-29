@@ -1,4 +1,49 @@
+---
+title: "Business Intelligence Project"
+author: "Challengers Team"
+date: "20th November 2023"
+output:
+  github_document: 
+    toc: yes
+    toc_depth: 4
+    fig_width: 6
+    fig_height: 4
+    df_print: default
+editor_options:
+  chunk_output_type: console
+  markdown: 
+    wrap: 72
+---
 
+------------------------------------------------------------------------
+
+# Student Details
+
++-------------+-----------------------------+
+| **Student   | 1.  124255 - Natasha        |
+| ID Numbers  |     Gichira                 |
+| and Names   | 2.  120415 - Emmanuel Agre  |
+| of Group    | 3.  118211 - Fredrick Koech |
+| Members**   | 4.  124562 - Ryan Munene    |
+|             | 5.  124422 - Dennis Muriuki |
++-------------+-----------------------------+
+| **GitHub    | Challengers Team            |
+| Classroom   |                             |
+| Group       |                             |
+| Name**      |                             |
++-------------+-----------------------------+
+| **Course    | BBT4206                     |
+| Code**      |                             |
++-------------+-----------------------------+
+| **Course    | Business Intelligence II    |
+| Name**      |                             |
++-------------+-----------------------------+
+| -   Program | Bachelor of Business        |
+|             | Information Technology      |
++-------------+-----------------------------+
+| **Semester  | 21^st^ August 2023 to       |
+| Duration**  | 28^th^ November 2023        |
++-------------+-----------------------------+
 ```markdown
 # R Code Analysis and Preprocessing
 

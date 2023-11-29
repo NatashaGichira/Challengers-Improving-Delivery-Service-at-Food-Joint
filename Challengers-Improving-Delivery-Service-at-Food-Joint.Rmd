@@ -91,4 +91,3 @@ This report has provided an overview of the data cleaning and exploration steps 
 
 ```
 
-Copy and paste this code into an R Markdown (`.Rmd`) file and knit it using an R Markdown-compatible environment (e.g., RStudio). This will generate an HTML report documenting the data cleaning and exploration process with explanations and visualizations.

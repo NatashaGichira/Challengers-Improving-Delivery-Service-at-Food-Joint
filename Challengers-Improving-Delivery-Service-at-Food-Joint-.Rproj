@@ -1,129 +1,1027 @@
-Certainly! Here's the continuous R code:
-
-```r
-# Install and load required libraries
+# Install and load relevant R libraries
+install.packages("readr")
 install.packages("dplyr")
 library(dplyr)
+library(readr)
 
+# Read CSV file into a data frame
+data <- read_csv("data/finalTrain.csv")
+
+# Display the first 3 rows of the data
+head(data, 3)
+
+# Display rows where "Delivery_person_Age" is null
+head(data[is.na(data$Delivery_person_Age), ], 3)
+
+# Display column names
+names(data)
+
+# Display the dimensions of the data (number of rows and columns)
+with_nan <- dim(data)
+
+# Display the sum of missing values for each column
+colSums(is.na(data))
+
+# Define a function to calculate mode
+mode_counter <- function(data, column_name) {
+  modes <- table(data[[column_name]])
+  
+  if (length(modes) > 1) {
+    cat("There are multiple mode values in the column.\n")
+    return(names(modes))  # Handle multiple modes as needed
+  } else {
+    cat("There is a single mode value in the column.\n")
+    return(as.numeric(names(modes)))  # Return the single mode value
+  }
+}
+
+# Drop rows with missing values in the "multiple_deliveries" column
+data <- data[complete.cases(data$multiple_deliveries), ]
+
+# Display the first 3 rows of the data
+head(data, 3)
+
+# Create a new data frame for Delivery_person_Ratings
+df <- data.frame(
+  Delivery_person_Ratings = c(5, 5, 6, 8, 3, 2, 4, 5, 8, 2, 2)
+)
+
+# Calculate mode for Delivery_person_Ratings in the new data frame
+mode_counter(df, "Delivery_person_Ratings")
+
+# Calculate mode for Delivery_person_Ratings in the original data
+mode_ratings <- mode_counter(data, "Delivery_person_Ratings")
+
+# Display the mode value(s) for Delivery_person_Ratings
+mode_ratings
+
+# Fill missing values in "Delivery_person_Ratings" with the mode
+data$Delivery_person_Ratings[is.na(data$Delivery_person_Ratings)] <- mode_ratings
+
+# Drop rows with missing values in the "Weather_conditions" column
+data <- data[complete.cases(data$Weather_conditions), ]
+
+# Display unique values in the "Road_traffic_density" column
+unique(data$Road_traffic_density)
+
+# Drop rows with missing values in the "Weather_conditions" column
+data <- data[complete.cases(data$Road_traffic_density), ]
+
+# Drop rows with missing values in the "Festival" column
+data <- data[complete.cases(data$Festival), ]
+
+# Drop rows with missing values in the "City" column
+data <- data[complete.cases(data$City), ]
+
+# Display the sum of missing values for each column
+colSums(is.na(data))
+
+# Display information about the data
+summary(data)
+
+# Install and load relevant R libraries
+install.packages("ggplot2")
+library(ggplot2)
+library(dplyr)
+
+# Define histplotcount_func function
+histplotcount_func <- function(input_feature, data, no_of_bins) {
+  # Plot histogram with ggplot2
+  ggplot(data, aes_string(x = input_feature)) +
+    geom_histogram(binwidth = no_of_bins, fill = "blue", color = "black", alpha = 0.7) +
+    labs(title = paste("Distribution of", input_feature),
+         x = input_feature,
+         y = "Frequency") +
+    theme_minimal()
+}
+
+# Plot histogram for "Delivery_person_Age"
+histplotcount_func("Delivery_person_Age", data, 5)
+
+# Calculate mean for "Delivery_person_Age" and fill missing values
+mean_age <- mean(data$Delivery_person_Age, na.rm = TRUE)
+data$Delivery_person_Age[is.na(data$Delivery_person_Age)] <- mean_age
+
+# Display counts for each value in "Delivery_person_Ratings"
+table(data$Delivery_person_Ratings)
+
+# Convert "Delivery_person_Ratings" to numeric if it's not already
+data$Delivery_person_Ratings <- as.numeric(data$Delivery_person_Ratings)
+
+# Remove rows where "Delivery_person_Ratings" is equal to 6.0
+data <- data[data$Delivery_person_Ratings != 6.0, ]
+
+# Plot histogram for "Delivery_person_Ratings" after removing 6.0 values
+histplotcount_func("Delivery_person_Ratings", data, 5)
+
+# Loop through each column in the DataFrame
+for (i in colnames(data)) {
+  cat(paste("Column Name:", i, ", Column Type:", typeof(data[[i]])), "\n")
+  cat(rep("=", 64), "\n")  # Use `rep` to repeat "="
+  unique_values <- unique(data[[i]])
+  print(unique_values)
+  cat(rep("=", 64), "\n")  # Use `rep` to repeat "="
+}
+
+# Count records with "Delivery_location_latitude" equal to 0
+count_zero_latitude <- sum(data$Delivery_location_latitude == 0)
+cat(paste("Number of records with Delivery_location_latitude equal to 0 =", count_zero_latitude), "\n")
+
+# Count records with "Restaurant_latitude" equal to 0
+count_zero_latitude <- sum(data$Restaurant_latitude == 0)
+cat(paste("Number of records with Restaurant_latitude equal to 0 =", count_zero_latitude), "\n")
+
+# Count records with "Restaurant_longitude" equal to 0
+count_zero_longitude <- sum(data$Restaurant_longitude == 0)
+cat(paste("Number of records with Restaurant_longitude equal to 0 =", count_zero_longitude), "\n")
+
+# Plot histogram for "Restaurant_latitude"
+histplotcount_func("Restaurant_latitude", data, 5)
+
+# Plot histogram for "Restaurant_longitude"
+histplotcount_func("Restaurant_longitude", data, 5)
+
+# Display information about the data
+str(data)
+
+# Calculate median for "Delivery_location_longitude" and fill missing values
+median_Delivery_location_longitude <- median(data$Delivery_location_longitude, na.rm = TRUE)
+data$Delivery_location_longitude[is.na(data$Delivery_location_longitude)] <- median_Delivery_location_longitude
+
+# Calculate median for "Delivery_location_latitude" and fill missing values
+median_Delivery_location_latitude <- median(data$Delivery_location_latitude, na.rm = TRUE)
+data$Delivery_location_latitude[is.na(data$Delivery_location_latitude)] <- median_Delivery_location_latitude
+
+# Display duplicated rows
+data[duplicated(data), ]
+
+# Display dimensions of the data without duplicates
+without_nan <- c(nrow(data), ncol(data))
+print(without_nan)
+
+# Calculate the number of rows with missing values
+num_rows_with_missing <- with_nan[1] - without_nan[1]
+
+# Calculate the percentage of rows with missing values
+percentage_missing <- (num_rows_with_missing / with_nan[1]) * 100
+
+# Display the calculated values
+num_rows_with_missing
+percentage_missing
+
+# Install and load relevant R libraries
+install.packages("dplyr")
+library(dplyr)
+install.packages("lubridate")
+library(lubridate)
+
+# Display information about the data
+str(data)
+
+# Display the first few rows of the "Order_Date" column
+head(data$Order_Date)
+
+# Display unique values in the "Order_Date" column
+unique(data$Order_Date)
+
+# Create "Day" column from "Order_Date" in the data frame
+data$Day <- day(ymd(data$Order_Date))
+
+# Display the first few rows of the data with the new "Day" column
+head(data)
+
+library(lubridate)
+
+# Assuming 'data' is your data frame
+data$Order_Date <- as.Date(data$Order_Date, format = "%d-%m-%Y")
+
+# Create "Month" and "Year" columns from "Order_Date" in the data frame
+data$Month <- month(data$Order_Date)
+data$Year <- year(data$Order_Date)
+
+# Display the first few rows of the "Order_Date" column
+head(data$Order_Date)
+
+# Drop the original "Order_Date" column
+data <- data %>% select(-Order_Date)
+
+# Display the first 3 rows of the data
+head(data, 3)
+
+# Display information about the data
+str(data)
+
+# Assuming 'data' is your data frame
+data <- data %>%
+  rename(
+    Day_Ordered = Day,
+    Month_Ordered = Month,
+    Year_Ordered = Year,
+    Time_taken_min = `Time_taken (min)`
+  )
+
+
+# Display the first 3 rows of the data with the renamed columns
+head(data, 3)
+
+# Define column_segregator function
+column_segregator <- function(data) {
+  categorical_columns <- character()
+  numerical_columns <- character()
+
+  # Exclude NA values from column names
+  valid_columns <- names(data)[!is.na(names(data))]
+
+  for (col in valid_columns) {
+    if (is.numeric(data[[col]]) || is.logical(data[[col]])) {
+      numerical_columns <- c(numerical_columns, col)
+    } else {
+      categorical_columns <- c(categorical_columns, col)
+    }
+  }
+
+  cat("Categorical Columns:", categorical_columns, "\n")
+  cat("Numerical Columns:", numerical_columns, "\n")
+
+  cat("Summary for Categorical Columns:\n")
+  print(summary(data[, categorical_columns]))
+
+  cat("Summary for Numerical Columns:\n")
+  print(summary(data[, numerical_columns]))
+
+  return(list(categorical_columns = categorical_columns, numerical_columns = numerical_columns))
+}
+
+# Apply column_segregator function to the data
+tryCatch(
+  {
+    result <- column_segregator(data)
+  },
+  error = function(e) {
+    cat("An error occurred:\n")
+    print(e)
+  }
+)
+
+
+# Display the names of categorical and numerical columns
+cat_cols <- result$categorical
+num_cols <- result$numerical
+
+cat("Categorical Columns:", cat_cols, "\n")
+cat("Numerical Columns:", num_cols, "\n")
+
+# Display summary statistics for categorical columns
+summary(data[cat_cols])
+
+# Display summary statistics for numerical columns
+summary(data[num_cols])
+
+# Check for numeric values in categorical columns
+for (column in cat_cols) {
+  if (any(sapply(data[[column]], is.numeric))) {
+    cat("Numeric values found in categorical column:", column, "\n")
+  } else {
+    cat("No numeric values found in categorical column:", column, "\n")
+  }
+}
+
+# Check if 'Time_Orderd' column exists in the data
+if ("Time_Orderd" %in% names(data)) {
+  # Filter rows that don't contain ":" (i.e., rows with floating-point values)
+  filtered_rows <- data[!(grepl(":", data$Time_Orderd) & !is.na(data$Time_Orderd)), ]
+  
+  # Continue with further analysis or processing using filtered_rows
+} else {
+  cat("Column 'Time_Orderd' not found in the data.\n")
+}
+print(names(data))
+
+
+# Filter rows that don't contain ":" (i.e., rows with floating-point values)
+#filtered_rows <- data[!(grepl(":", data$Time_Orderd) & !is.na(data$Time_Orderd)), ]
+
+# Sort rows based on "Time_Orderd" column
+sorted_rows <- filtered_rows[order(filtered_rows$Time_Orderd), ]
+
+# Retrieve only the "Time_Orderd" column values
+result <- data.frame(Time_Orderd = sorted_rows$Time_Orderd)
+
+# Count the occurrences of each unique value in the resulting column
+value_counts <- table(result$Time_Orderd)
+
+# Display the value counts
+cat(value_counts, "\nSum =", sum(value_counts), "\n")
+
+# Filter rows that don't contain ":" (i.e., rows with floating-point values)
+filtered_rows_picked <- data[!(grepl(":", data$Time_Order_picked) & !is.na(data$Time_Order_picked)), ]
+
+# Sort rows based on "Time_Order_picked" column
+sorted_rows_picked <- filtered_rows_picked[order(filtered_rows_picked$Time_Order_picked), ]
+
+# Retrieve only the "Time_Order_picked" column values
+result_picked <- data.frame(Time_Order_picked = sorted_rows_picked$Time_Order_picked)
+
+# Count the occurrences of each unique value in the resulting column
+value_counts_picked <- table(result_picked$Time_Order_picked)
+
+# Display the value counts
+cat(value_counts_picked, "\nSum =", sum(value_counts_picked), "\n")
+
+numeric_data <- data[, sapply(data, is.numeric)]
+
+
+# Assuming 'numeric_data' is your numeric data frame
+summary(numeric_data)
+
+constant_vars <- sapply(numeric_data, function(x) length(unique(x)) == 1)
+constant_vars_names <- names(constant_vars[constant_vars])
+print(constant_vars_names)
+
+head(numeric_data_filtered, 3)
+
+library(caret)
+
+# Assuming 'numeric_data' is your numeric data frame
+numeric_data_filtered <- nzv(numeric_data)
+correlation_matrix <- cor(as.matrix(numeric_data_filtered), use = "complete.obs")
+
+dim(correlation_matrix)
+
+# Set up the figure and axes
+heatmap_col <- colorRampPalette(c("blue", "white", "red"))(100)
+heatmap_row <- colorRampPalette(c("blue", "white", "red"))(100)
+
+# Create the heatmap with annotations and a color map
+heatmap(correlation_matrix, col = heatmap_col, Rowv = NA, Colv = NA, scale = "none", margins = c(5, 5))
+
+# Add a title
+title(main = "Correlation Heatmap")
+
+# Install and load relevant R libraries
 install.packages("ggplot2")
 library(ggplot2)
 
-# Read data from CSV file
+barplot_func <- function(data, input_feature, output_feature) {
+  ggplot(data, aes(x = data[[input_feature]], y = data[[output_feature]])) +
+    geom_bar(stat = "identity", position = "dodge") +
+    labs(x = input_feature, y = output_feature, title = paste(output_feature, "by", input_feature)) +
+    theme_minimal()
+}
+
+# Example usage
+barplot_func(data, "Weather_conditions", "Time_taken_min")
+
+# Display unique values in "Weather_conditions" column
+unique(data$Weather_conditions)
+
+# Create a mapping for "Weather_conditions"
+Weather_conditions_map <- c('Fog' = 1, 'Cloudy' = 2, 'Windy' = 3, 'Sandstorms' = 4, 'Stormy' = 5, 'Sunny' = 6)
+
+# Map "Weather_conditions" using the defined mapping
+data$Weather_conditions <- as.factor(Weather_conditions_map[data$Weather_conditions])
+
+# Display unique values in "Road_traffic_density" column
+unique(data$Road_traffic_density)
+
+# Create a mapping for "Road_traffic_density"
+Road_traffic_density_map <- c('Jam' = 1, 'High' = 2, 'Medium' = 3, 'Low' = 4)
+
+# Map "Road_traffic_density" using the defined mapping
+data$Road_traffic_density <- as.factor(Road_traffic_density_map[data$Road_traffic_density])
+
+# Plot barplot for "Type_of_vehicle" vs. "Time_taken_min"
+barplot_func(data, "Type_of_vehicle", "Time_taken_min")
+
+# Display unique values in "Type_of_vehicle" column
+unique(data$Type_of_vehicle)
+
+# Create a mapping for "Type_of_vehicle"
+Type_of_vehicle_map <- c('motorcycle' = 1, 'scooter' = 2, 'electric_scooter' = 3)
+
+# Map "Type_of_vehicle" using the defined mapping
+data$Type_of_vehicle <- as.factor(Type_of_vehicle_map[data$Type_of_vehicle])
+
+# Plot barplot for "City" vs. "Time_taken_min"
+barplot_func(data, "City", "Time_taken_min")
+
+# Display unique values in "City" column
+unique(data$City)
+
+# Create a mapping for "City"
+City_map <- c('Urban' = 3, 'Metropolitan' = 2, 'Semi-Urban' = 1)
+
+# Map "City" using the defined mapping
+data$City <- as.factor(City_map[data$City])
+
+# Define your mapping lists
+City_map <- c('Urban' = 3, 'Metropolitan' = 2, 'Semi-Urban' = 1)
+Type_of_vehicle_map <- c('motorcycle' = 1, 'scooter' = 2, 'electric_scooter' = 3)
+Road_traffic_density_map <- c('Jam' = 1, 'High' = 2, 'Medium' = 3, 'Low' = 4)
+Weather_conditions_map <- c('Fog' = 1, 'Cloudy' = 2, 'Windy' = 3, 'Sandstorms' = 4, 'Stormy' = 5, 'Sunny' = 6)
+
+# Create a named list of mapping vectors
+mapping_dicts <- list(
+  City = City_map,
+  Type_of_vehicle = Type_of_vehicle_map,
+  Road_traffic_density = Road_traffic_density_map,
+  Weather_conditions = Weather_conditions_map
+)
+
+# Display the keys in the mapping dictionaries
+cat(names(mapping_dicts), "\n")
+
+# Map values using the mapping dictionaries
+for (column in names(mapping_dicts)) {
+  data[[column]] <- mapping_dicts[[column]][data[[column]]]
+}
+
+# Install and load relevant R libraries
+install.packages("tidyverse")
+library(tidyverse)
+
+# Install and load the fastDummies package
+install.packages("fastDummies")
+library(fastDummies)
+
+one_hot_encoder_func <- function(data, column_name) {
+  # Validate inputs
+  if (!is.data.frame(data)) {
+    stop("Input 'data' must be a data frame.")
+  }
+
+  if (!column_name %in% names(data)) {
+    stop(paste("Column '", column_name, "' not found in the data frame."))
+  }
+
+  # Perform one-hot encoding
+  one_hot_encoded <- model.matrix(~ . - 1, data = data[, column_name, drop = FALSE])
+  colnames(one_hot_encoded) <- sub("^.*\\.", "", colnames(one_hot_encoded))
+
+  # Concatenate the one-hot encoded columns with the original data frame
+  data <- cbind(data, one_hot_encoded)
+
+  # Drop the original column
+  data <- data[, !(names(data) %in% column_name), drop = FALSE]
+
+  return(data)
+}
+
+# Display the first 3 rows of the data
+head(data, 3)
+
+# Display unique values in "Type_of_order" column
+unique(data$Type_of_order)
+
+# Perform one-hot encoding for "Type_of_order" column
+data <- one_hot_encoder_func(data, "Type_of_order")
+
+# Perform one-hot encoding for "Festival" column
+data <- one_hot_encoder_func(data, "Festival")
+
+# Display the first 3 rows of the data after one-hot encoding
+head(data, 3)
+
+# Install and load relevant R libraries
+install.packages("ggplot2")
+install.packages("corrplot")
+library(corrplot)
+library(ggplot2)
+
+
+# Define lineplot_with_kde function
+lineplot_with_kde <- function(input_feature, output_feature, data) {
+  # Plot line plot with KDE
+  plt <- ggplot(data, aes(x = !!sym(input_feature), y = !!sym(output_feature))) +
+    geom_line(color = 'blue', size = 1, alpha = 0.8) +
+    geom_density_2d(color = 'red', fill = 'red', alpha = 0.2) +
+    labs(title = paste("Line Plot with KDE of", output_feature, "based on", input_feature),
+         x = input_feature, y = output_feature) +
+    theme_minimal()
+
+  # Print the plot
+  print(plt)
+}
+
+# Define a target column
+target_col <- "Time_taken_min"
+
+# Plot line plot with KDE for "Delivery_person_Age"
+lineplot_with_kde("Delivery_person_Age", target_col, data)
+
+# Plot line plot with KDE for "Delivery_person_Ratings"
+lineplot_with_kde("Delivery_person_Ratings", target_col, data)
+
+# Plot line plot with KDE for "Weather_conditions"
+lineplot_with_kde("Weather_conditions", target_col, data)
+
+# Display the mapping for "Weather_conditions"
+Weather_conditions_map
+
+# Plot line plot with KDE for "Vehicle_condition"
+lineplot_with_kde("Vehicle_condition", target_col, data)
+
+# Calculate the correlation matrix
+correlation_matrix <- cor(data, use = "complete.obs")
+
+# Set up the figure and axes
+par(mfrow = c(1, 1), mar = c(2, 2, 2, 2))  # Set the margins to adjust the plot size
+corrplot(correlation_matrix, method = "color", col = colorRampPalette(c("blue", "white", "red"))(100), type = "upper", order = "hclust", tl.col = "black")
+title("Correlation Heatmap")
+
+# Plot barplot for "multiple_deliveries"
+barplot_func <- function(data, input_feature, output_feature) {
+  # Create barplot
+  plt <- ggplot(data, aes(x = !!sym(input_feature), y = !!sym(output_feature))) +
+    geom_bar(stat = "identity", fill = "skyblue", color = "black") +
+    labs(title = paste(output_feature, "by", input_feature),
+         x = input_feature, y = output_feature) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+  # Print the plot
+  print(plt)
+}
+
+# Plot barplot for "multiple_deliveries"
+barplot_func(data, "multiple_deliveries", target_col)
+
+# Plot barplot for "FestivalYes"
+barplot_func(data, "FestivalYes", target_col)
+
+# Plot barplot for "City"
+barplot_func(data, "City", target_col)
+
+# Display the mapping for "City"
+City_map
+
+# Plot barplot for "Delivery_person_Ratings" vs. "Delivery_person_Age"
+barplot_func(data, "Delivery_person_Ratings", "Delivery_person_Age")
+
+# Plot barplot for "multiple_deliveries" vs. "Delivery_person_Age"
+barplot_func(data, "multiple_deliveries", "Delivery_person_Age")
+
+# Plot barplot for "multiple_deliveries" vs. "Road_traffic_density"
+barplot_func(data, "multiple_deliveries", "Road_traffic_density")
+
+# Display the mapping for "Road_traffic_density"
+Road_traffic_density_map
+
+# Plot barplot for "FestivalYes" vs. "Road_traffic_density"
+barplot_func(data, "FestivalYes", "Road_traffic_density")
+
+# Plot barplot for "City" vs. "Road_traffic_density"
+barplot_func(data, "City", "Road_traffic_density")
+
+# Display the mapping for "City"
+City_map
+
+# Plot barplot for "Type_of_vehicle" vs. "Vehicle_condition"
+barplot_func(data, "Type_of_vehicle", "Vehicle_condition")
+
+# Display the mapping for "Type_of_vehicle"
+Type_of_vehicle_map
+
+# Plot barplot for "FestivalYes" vs. "multiple_deliveries"
+barplot_func(data, "FestivalYes", "multiple_deliveries")
+
+# Plot barplot for "FestivalYes" vs. "multiple_deliveries"
+barplot_func(data, "FestivalYes", "multiple_deliveries")
+
+# Plot barplot for "multiple_deliveries"
+barplot_func <- function(data, input_feature, output_feature) {
+  ggplot(data, aes_string(x = input_feature, y = output_feature, fill = input_feature)) +
+    geom_bar(stat = "identity", position = "dodge", color = "black") +
+    labs(x = input_feature, y = output_feature, title = paste(output_feature, "by", input_feature)) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+}
+
+# Plot barplot for "multiple_deliveries"
+barplot_func(data, "multiple_deliveries", target_col)
+
+# Plot barplot for "FestivalYes"
+barplot_func(data, "FestivalYes", target_col)
+
+# Plot barplot for "City"
+barplot_func(data, "City", target_col)
+
+# Display the mapping for "City"
+City_map
+
+# Plot barplot for "Delivery_person_Ratings" vs. "Delivery_person_Age"
+barplot_func(data, "Delivery_person_Ratings", "Delivery_person_Age")
+
+# Plot barplot for "multiple_deliveries" vs. "Delivery_person_Age"
+barplot_func(data, "multiple_deliveries", "Delivery_person_Age")
+
+# Plot barplot for "multiple_deliveries" vs. "Road_traffic_density"
+barplot_func(data, "multiple_deliveries", "Road_traffic_density")
+
+# Display the mapping for "Road_traffic_density"
+Road_traffic_density_map
+
+# Plot barplot for "FestivalYes" vs. "Road_traffic_density"
+barplot_func(data, "FestivalYes", "Road_traffic_density")
+
+# Plot barplot for "City" vs. "Road_traffic_density"
+barplot_func(data, "City", "Road_traffic_density")
+
+# Display the mapping for "City"
+City_map
+
+# Plot barplot for "Type_of_vehicle" vs. "Vehicle_condition"
+barplot_func(data, "Type_of_vehicle", "Vehicle_condition")
+
+# Display the mapping for "Type_of_vehicle"
+Type_of_vehicle_map
+
+# Plot barplot for "FestivalYes" vs. "multiple_deliveries"
+barplot_func(data, "FestivalYes", "multiple_deliveries")
+
+# Plot barplot for "FestivalYes" vs. "multiple_deliveries"
+barplot_func(data, "FestivalYes", "multiple_deliveries")
+
+# Install and load relevant R libraries
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("corrplot")
+library(dplyr)
+library(ggplot2)
+library(corrplot)
+
+# Define custom_pairbarplot function
+custom_pairbarplot <- function(data, columns_to_compare, input_column_type, output_column, type_of_plot) {
+    # Grouping and summing each order type based on festival status
+    grouped <- data %>% group_by(across(all_of(output_column))) %>% summarise(across(all_of(columns_to_compare), sum))
+
+    # Plotting the bar plots
+    ggplot(grouped, aes(x = across(all_of(output_column)), y = across(all_of(columns_to_compare)), fill = across(all_of(columns_to_compare)))) +
+        geom_bar(stat = "identity", position = "dodge", color = "black") +
+        labs(x = input_column_type, y = output_column, title = paste(output_column, "Status")) +
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1))
+}
+
+# Define columns_to_compare, input_column_type, output_column, and type_of_plot
+columns_to_compare <- c('Type_of_orderBuffet', 'Type_of_orderDrinks', 'Type_of_orderMeal', 'Type_of_orderSnack')
+input_column_type <- 'Order_Type'
+output_column <- 'City'
+type_of_plot <- 'identity'
+
+# Plot custom pair barplot for "City"
+custom_pairbarplot <- function(data, columns_to_compare, input_column_type, output_column, type_of_plot) {
+    # Convert output_column to character (assuming it's not already)
+    output_column <- as.character(output_column)
+
+    # Grouping and summing each order type based on festival status
+    grouped <- data %>%
+        group_by(across(all_of(output_column))) %>%
+        summarise(across(all_of(columns_to_compare), sum), .groups = 'drop')
+
+    # Plotting the bar plots
+    ggplot(grouped, aes(x = .data[[output_column]], y = !!as.name(columns_to_compare[1]), fill = !!as.name(columns_to_compare[1]))) +
+        geom_bar(stat = "identity", position = "dodge", color = "black") +
+        labs(x = input_column_type, y = output_column, title = paste(output_column, "Status")) +
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1))
+}
+
+# Example usage
+custom_pairbarplot(data, columns_to_compare, input_column_type, "City", type_of_plot)
+
+# Display the mapping for "City"
+City_map
+
+# Define columns_to_compare, input_column_type, output_column, and type_of_plot
+columns_to_compare <- c('Type_of_orderBuffet', 'Type_of_orderDrinks', 'Type_of_orderMeal', 'Type_of_orderSnack')
+input_column_type <- 'Order_Type'
+output_column <- 'FestivalYes'
+type_of_plot <- 'identity'
+
+# Plot custom pair barplot for "FestivalYes"
+custom_pairbarplot(data, columns_to_compare, input_column_type, output_column, type_of_plot)
+
+# Calculate the correlation matrix
+correlation_matrix <- cor(data, use = "complete.obs")
+
+# Set up the figure and axes
+par(mfrow = c(1, 1), mar = c(2, 2, 2, 2))  # Set the margins to adjust the plot size
+
+# Create the correlation heatmap
+corrplot(correlation_matrix, method = "color", col = colorRampPalette(c("blue", "white", "red"))(100), type = "upper", order = "hclust", tl.col = "black")
+
+# Add a title
+title("Correlation Heatmap")
+
+# Show the plot
+print('\n')
+
+# Display unique values in "City" column
+unique(data$City)
+
+# Save the dataframe as a CSV file
+write.csv(data, "cleaned_data.csv", row.names = FALSE)
+
+
+
+
+#################################################################
+
+
+
+
+# MODEL TRAINING
+
+# Install and load necessary libraries
+install.packages("tidyverse")
+library(tidyverse)
+
+# Read the CSV file
 data <- read.csv("data/finalTrain.csv")
 
-# Check first few rows of the data
+# Display the first 3 rows of the data
 head(data, 3)
 
-# Check rows with missing values in "Delivery_person_Age"
-head(data[is.na(data$Delivery_person_Age)], 3)
+# Drop specified columns
+data <- data %>%
+  select(-ID, -Delivery_person_ID, -Time_Orderd, -Time_Order_picked)
 
-# Check the data types and number of non-null values for each column
-summary(data)
-
-# Drop columns with no information or unique values
-data <- data %>% select(-Delivery_person_ID, -Delivery_person_ID, -ID, -Time_Orderd, -Time_Order_picked)
-
-# Check the data types and number of non-null values for each column after dropping columns
-summary(data)
-
-# Check first few rows of the data after dropping columns
+# Display the first 3 rows of the data after dropping columns
 head(data, 3)
 
-# Define a function to plot histograms with density curves
-histplotcount_func <- function(input_feature, data, no_of_bins) {
-  ggplot(data, aes(x = input_feature)) +
-    geom_histogram(bins = no_of_bins) +
-    stat_density(geom = "line", color = "blue") +
-    labs(title = paste("Distribution of", input_feature), x = input_feature, y = "Frequency") +
-    theme_bw()
+# Remove non-alphanumeric characters and replace with underscores
+colnames(data) <- gsub("[^a-zA-Z0-9_]", "_", colnames(data))
 
-  # Show the plot
-  print(ggplot2::last_plot())
+# Replace the column name with the desired name
+colnames(data) <- sub("Time_taken__min_", "Time_taken_min", colnames(data))
+
+# Print column names after renaming
+print(names(data))
+
+# Create predictors (X) and response variable (y)
+X <- data %>%
+  select(-Time_taken_min)  # Select all columns except Time_taken_min
+
+y <- data %>%
+  select(Time_taken_min)
+
+# Check the structure of your data before preprocessing
+summary(X)
+
+# Display the first 3 rows of y
+head(y, 3)
+
+# Display the first 3 rows of X
+head(X, 3)
+
+# Install and load necessary libraries
+install.packages(c("caret", "dplyr"))
+library(caret)
+library(dplyr)
+
+# Handling Missing Values
+cat_col_null_list <- character(0)
+num_col_null_list <- character(0)
+
+# Loop through columns to identify missing values
+for (col in colnames(data)) {
+  if (sum(is.na(data[[col]])) > 0) {
+    if (col %in% cat_cols) {
+      cat_col_null_list <- c(cat_col_null_list, paste0(col, " = ", sum(is.na(data[[col]]))))
+    }
+    if (col %in% num_cols) {
+      num_col_null_list <- c(num_col_null_list, paste0(col, " = ", sum(is.na(data[[col]]))))
+    }
+  }
 }
 
-# Plot histogram with density curve for "Delivery_person_Age"
-histplotcount_func("Delivery_person_Age", data, 5)
+# Display missing values in categorical columns
+cat_col_null_list
 
-# Calculate the mean of "Delivery_person_Age" to fill missing values
-mean_age <- mean(data$Delivery_person_Age)
-
-# Fill missing values in "Delivery_person_Age" with the mean
-data$Delivery_person_Age <- replace(data$Delivery_person_Age, is.na(data$Delivery_person_Age), mean_age)
-
-# Check the distribution of "Delivery_person_Ratings"
-data$Delivery_person_Ratings %>% count()
-
-# Remove rows where "Delivery_person_Ratings" is 6
-data <- data %>% filter(Delivery_person_Ratings != 6)
-
-# Plot histogram with density curve for "Delivery_person_Ratings"
-histplotcount_func("Delivery_person_Ratings", data, 5)
-
-# Loop through each column in the DataFrame and print information about each column
-for (i in colnames(data)) {
-  print(paste0("Column Name: ", i))
-  print(paste0("Column Type: ", typeof(data[[i]])))
-  print(rep("=", 64))
-
-  # Print unique values in the column
-  unique_values <- unique(data[[i]])
-  print(unique_values)
-  print(rep("=", 64))
+# Calculate the sum of null values in categorical columns if the list is not empty
+null_sum_catcols <- 0  # Initialize to 0
+if (length(cat_col_null_list) > 0) {
+  null_sum_catcols <- sum(as.numeric(strsplit(gsub("[^0-9]", "", cat_col_null_list), "=")[[1]]))
+  print(paste("Sum of null values in categorical columns:", null_sum_catcols))
+} else {
+  print("No null values in categorical columns.")
 }
 
-# Count the number of records with zero values in "Delivery_location_latitude"
-count_zero_longitude <- sum(data$Delivery_location_latitude == "0")
-print(paste0("Number of records with Delivery_location_latitude equal to 0: ", count_zero_longitude))
+# Calculate the sum of null values in numerical columns
+null_sum_numcols <- sum(as.numeric(strsplit(gsub("[^0-9]", "", num_col_null_list), "=")[[1]]))
+print(paste("Sum of null values in numerical columns:", null_sum_numcols))
 
-# Count the number of records with zero values in "Restaurant_latitude"
-count_zero_latitude <- sum(data$Restaurant_latitude == 0)
-print(paste0("Number of records with Restaurant_latitude equal to 0: ", count_zero_latitude))
+# Calculate the total sum of null values
+total_null_sum <- null_sum_catcols + null_sum_numcols
+print(paste("Total sum of null values:", total_null_sum))
 
-# Count the number of records with zero values in "Restaurant_longitude"
-count_zero_longitude <- sum(data$Restaurant_longitude == 0)
-print(paste0("Number of records with Restaurant_longitude equal to 0: ", count_zero_longitude))
+# Display the number of null values in numerical columns
+print(paste("Number of null values in numerical columns:", null_sum_numcols))
 
-# Plot histogram with density curve for "Restaurant_latitude"
-histplotcount_func("Restaurant_latitude", data, 5)
+# Display the shape of X
+dim(X)
 
-# Plot histogram with density curve for "Restaurant_longitude"
-histplotcount_func("Restaurant_longitude", data, 5)
+# Install and load necessary libraries
+install.packages(c("caret", "recipes", "dplyr"))
+library(caret)
+library(recipes)
+library(dplyr)
 
-# Check the data types and number of non-null values for each column again
-summary(data)
+# Install and load the necessary packages if not already installed
+if (!requireNamespace("workflows", quietly = TRUE)) {
+  install.packages("workflows")
+}
+library(workflows)
 
-# Calculate the median of "Delivery_location_longitude" to fill missing values
-median_Delivery_location_longitude <- median(data$Delivery_location_longitude)
 
-# Fill missing values in "Delivery_location_longitude" with the median
-data$Delivery_location_longitude <- replace(data$Delivery_location_longitude, is.na(data$Delivery_location_longitude), median_Delivery_location_longitude)
+# Defining custom rankings for each ordinal feature
+Weather_conditions_cat <- c('Sunny', 'Stormy', 'Sandstorms', 'Windy', 'Cloudy', 'Fog', 'nan')
+Road_traffic_density_cat <- c('Low', 'Medium', 'High', 'Jam', 'nan')
+City_cat <- c('Urban', 'Metropolitan', 'Semi-Urban', 'nan')
 
-# Calculate the median of "Delivery_location_latitude" to fill missing values
-median_Delivery_location_latitude <- median(data$Delivery_location_latitude)
+Type_of_order_cat <- c('Buffet', 'Drinks', 'Meal', 'Snack')
+Type_of_vehicle_cat <- c('bicycle', 'electric_scooter', 'motorcycle', 'scooter')
+Festival_cat <- c('No', 'Yes', 'nan')
 
-# Fill missing values in "Delivery_location_latitude" with the median
-data$Delivery_location_latitude <- replace(data$Delivery_location_latitude, is.na(data$Delivery_location_latitude), median_Delivery_location_latitude)
+numerical_columns <- c('Delivery_person_Age', 'Delivery_person_Ratings', 'Restaurant_latitude', 'Restaurant_longitude', 'Delivery_location_latitude', 'Delivery_location_longitude', 'Vehicle_condition', 'multiple_deliveries', 'Day_Ordered', 'Month_Ordered', 'Year_Ordered')
+cat_ordinal_columns <- c("Weather_conditions", "Road_traffic_density", "City")
+cat_ohe_columns <- c("Type_of_order", "Type_of_vehicle", "Festival")
 
-# Check for duplicate rows
-duplicate_rows <- data[duplicated(data)]
+# Check the structure of your data
+summary(X)
 
-# Check the number of rows with and without duplicates
-data.shape
+# Load necessary packages
+library(caret)
 
-# Calculate the percentage of rows with duplicates
-percentage_duplicates <- (data.shape[0] - without_nan[0]) / data.shape[0] * 100
-print(paste0("Percentage of rows with duplicates: ", round(percentage_duplicates, 2), "%"))
+# Assuming X is your data frame
 
-# Calculate the percentage of missing values in the dataset
-missing_values_percentage <- (with_nan[0] - without_nan[0]) / with_nan[0] * 100
-print(paste0("Percentage of missing values in the dataset: ", round(missing_values_percentage, 2), "%"))
+# Identify numeric features
+numeric_features <- sapply(X, is.numeric)
 
-# Calculate the percentage of valid data in the dataset
-valid_data_percentage <- 100 - missing_values_percentage
-print(paste0("Percentage of valid data in the dataset: ", round(valid_data_percentage, 2), "%"))
+# Create a pre-processing recipe
+preprocess_recipe <- preProcess(X, method = c("medianImpute", "center", "scale"), y = TRUE)
 
-# Calculate the conversion rate
-conversion_rate <- (2938 / 42646) * 100
-print(paste0("Conversion rate: ", round(conversion_rate, 2), "%"))
+# Apply the recipe to the data
+preprocessed_data <- predict(preprocess_recipe, newdata = X)
 
-# Check the data types
+# Combine preprocessed numerical and categorical data
+preprocessed_data <- cbind(preprocessed_data, y)
+
+# Print summary of preprocessed data
+summary(preprocessed_data)
+
+# Install and load necessary libraries
+install.packages("recipes")
+library(recipes)
+
+table(y$Time_taken_min)
+
+# Split the data into training and testing sets
+set.seed(20)
+split_data <- caret::createDataPartition(preprocessed_data$Time_taken_min, p = 0.7, list = FALSE)
+X_train <- preprocessed_data[split_data, ]
+X_test <- preprocessed_data[-split_data, ]
+
+# Display the first few rows of the training set
+head(X_train)
+
+# Display the first few rows of the testing set
+head(X_test)
+
+# Apply the preprocessor to the training and testing sets
+X_train <- predict(preprocess_recipe, newdata = X_train)
+X_test <- predict(preprocess_recipe, newdata = X_test)
+
+# Display column names of X_train
+colnames(X_train)
+
+# Install and load necessary libraries
+install.packages(c("glmnet", "yardstick"))
+library(glmnet)
+library(yardstick)
+
+# Merge X_train and y_train based on a common identifier, e.g., row indices
+train_data <- cbind(X_train, y_train)
+
+str(train_data)
+str(y_train)
+
+# Create linear regression model
+regression <- lm(Time_taken_min ~ ., data = train_data)
+
+# Display the coefficients
+coefficients <- coef(regression)
+print(coefficients)
+
+# Create linear regression model
+regression <- lm(Time_taken_min ~ ., data = train_data)
+
+# Display the intercept
+intercept <- coef(regression)[1]
+print(intercept)
+
+# Install and load necessary libraries
+install.packages(c("yardstick", "glmnet"))
+
+# Load the libraries
+library(yardstick)
+library(glmnet)
+
+library(caret)
+
+# Function to evaluate the model
+evaluate_model <- function(true, predicted) {
+  mae <- caret::MAE(true, predicted)
+  mse <- caret::RMSE(true, predicted)
+  rmse <- caret::RMSE(true, predicted)
+  r2_square <- caret::R2(true, predicted)
+  return(c(MAE = mae, RMSE = rmse, R2_Square = r2_square))
+}
+
+str(y_train)
+
+# If it's not numeric, convert it to numeric
+y_train <- as.numeric(y_train)
+
+# Check the class again
+class(y_train$Time_taken_min)
+
+
+# Create a list of models
+models <- list(
+  LinearRegression = lm(Time_taken_min ~ ., data = X_train),
+  Lasso = cv.glmnet(as.matrix(X_train), as.vector(y_train), alpha = 1),
+  Ridge = cv.glmnet(as.matrix(X_train), as.vector(y_train), alpha = 0),
+  ElasticNet = cv.glmnet(as.matrix(X_train), as.vector(y_train), alpha = 0.5)
+)
+
+# Lists to store model names and R2 scores
+model_list <- vector("character", length = length(models))
+r2_list <- vector("numeric", length = length(models))
+
+# Convert y_test to a data frame
+#y_test <- as.data.frame(y_test)
+
+# Make predictions
+y_pred <- predict(model, newdata = X_test)
+
+# Display the structure of y_test and y_pred
+str(y_test$Time_taken_min)
+str(y_pred)
+class(y_test)
+
+# Display the structure of y_test
+str(y_test)
+
+# Display the column names of y_test
+colnames(y_test)
+
+# Loop through the models
+for (i in seq_along(models)) {
+  model <- models[[i]]
+
+  # Ensure that y_test contains the column "y_test"
+  if ("y_test" %in% colnames(y_test)) {
+    # Make predictions
+    y_pred <- predict(model, newdata = X_test)
+
+    # Combine true values and predicted values
+    results <- data.frame(True = y_test$y_test, Pred = y_pred)
+
+    # Remove rows with missing values
+    results <- na.omit(results)
+
+    # Evaluate the model
+    metrics <- evaluate_model(results$True, results$Pred)
+
+    # Print results
+    cat(names(models)[i], "\n")
+    cat("Model Training Performance\n")
+    cat("RMSE: ", metrics["RMSE"], "\n")
+    cat("MAE: ", metrics["MAE"], "\n")
+    cat("R2 Score: ", metrics["R2_Square"] * 100, "\n")
+    cat("=" * 100, "\n")
+
+    # Store model name and R2 score
+    model_list[i] <- names(models)[i]
+    r2_list[i] <- metrics["R2_Square"]
+  } else {
+    cat("Column 'y_test' not found in y_test.\n")
+  }
+}
+
+# Display the list of models
+model_list
+
+# Display information about the data
+str(data)
+
+
+#saving the model
+
+# Assuming "best_model" is the best-performing model
+best_model <- models$LinearRegression
+
+# Save the model
+saveRDS(best_model, file = "linear_regression_model.rds")

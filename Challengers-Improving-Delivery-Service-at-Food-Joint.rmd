@@ -1,4 +1,4 @@
-Certainly! Below is a simple R Markdown (`.Rmd`) document that incorporates the provided R code. This document assumes that you want to create a report with explanations and visualizations.
+
 
 ```markdown
 ---

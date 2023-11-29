@@ -1,0 +1,94 @@
+Certainly! Below is a simple R Markdown (`.Rmd`) document that incorporates the provided R code. This document assumes that you want to create a report with explanations and visualizations.
+
+```markdown
+---
+title: "Data Cleaning and Exploration Report"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+This report aims to document the data cleaning and exploration process for the given dataset. We will use R to perform various tasks such as handling missing values, visualizing data distributions, and making data quality improvements.
+
+## Load Libraries and Data
+
+```{r load-libraries-and-data}
+# Install and load required libraries
+install.packages("dplyr")
+library(dplyr)
+
+install.packages("ggplot2")
+library(ggplot2)
+
+# Read data from CSV file
+data <- read.csv("data/finalTrain.csv")
+```
+
+## Initial Data Inspection
+
+```{r initial-data-inspection}
+# Check first few rows of the data
+head(data, 3)
+
+# Check rows with missing values in "Delivery_person_Age"
+head(data[is.na(data$Delivery_person_Age), ], 3)
+
+# Check the data types and number of non-null values for each column
+summary(data)
+```
+
+## Data Cleaning
+
+```{r data-cleaning}
+# Drop columns with no information or unique values
+data <- data %>% select(-Delivery_person_ID, -ID, -Time_Orderd, -Time_Order_picked)
+
+# Check the data types and number of non-null values for each column after dropping columns
+summary(data)
+
+# Check first few rows of the data after dropping columns
+head(data, 3)
+```
+
+## Exploratory Data Analysis
+
+### Distribution of Delivery Person Age
+
+```{r eda-age-distribution}
+# Plot histogram with density curve for "Delivery_person_Age"
+histplotcount_func("Delivery_person_Age", data, 5)
+```
+
+### Handling Missing Values
+
+```{r handle-missing-values}
+# Calculate the mean of "Delivery_person_Age" to fill missing values
+mean_age <- mean(data$Delivery_person_Age)
+
+# Fill missing values in "Delivery_person_Age" with the mean
+data$Delivery_person_Age <- replace(data$Delivery_person_Age, is.na(data$Delivery_person_Age), mean_age)
+```
+
+### Distribution of Delivery Person Ratings
+
+```{r eda-ratings-distribution}
+# Remove rows where "Delivery_person_Ratings" is 6
+data <- data %>% filter(Delivery_person_Ratings != 6)
+
+# Plot histogram with density curve for "Delivery_person_Ratings"
+histplotcount_func("Delivery_person_Ratings", data, 5)
+```
+
+# Conclusion
+
+This report has provided an overview of the data cleaning and exploration steps performed on the given dataset. Additional analyses and visualizations can be added based on specific requirements.
+
+```
+
+Copy and paste this code into an R Markdown (`.Rmd`) file and knit it using an R Markdown-compatible environment (e.g., RStudio). This will generate an HTML report documenting the data cleaning and exploration process with explanations and visualizations.

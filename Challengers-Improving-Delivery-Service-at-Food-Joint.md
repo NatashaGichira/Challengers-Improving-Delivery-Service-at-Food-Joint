@@ -1,34 +1,49 @@
-Certainly! Here's the continuous R code:
 
-```r
-# Install and load required libraries
+```markdown
+# R Code Analysis and Preprocessing
+
+## Install and load required libraries
+```R
 install.packages("dplyr")
 library(dplyr)
 
 install.packages("ggplot2")
 library(ggplot2)
+```
 
+## Read Data
+```R
 # Read data from CSV file
 data <- read.csv("data/finalTrain.csv")
 
 # Check first few rows of the data
 head(data, 3)
+```
 
+## Exploratory Data Analysis (EDA)
+
+### Missing Values
+```R
 # Check rows with missing values in "Delivery_person_Age"
 head(data[is.na(data$Delivery_person_Age)], 3)
 
 # Check the data types and number of non-null values for each column
 summary(data)
+```
 
+### Drop Unnecessary Columns
+```R
 # Drop columns with no information or unique values
-data <- data %>% select(-Delivery_person_ID, -Delivery_person_ID, -ID, -Time_Orderd, -Time_Order_picked)
+data <- data %>% select(-Delivery_person_ID, -ID, -Time_Orderd, -Time_Order_picked)
 
 # Check the data types and number of non-null values for each column after dropping columns
 summary(data)
+```
 
-# Check first few rows of the data after dropping columns
-head(data, 3)
+## Data Visualization
 
+### Histogram Plot Function
+```R
 # Define a function to plot histograms with density curves
 histplotcount_func <- function(input_feature, data, no_of_bins) {
   ggplot(data, aes(x = input_feature)) +
@@ -43,7 +58,10 @@ histplotcount_func <- function(input_feature, data, no_of_bins) {
 
 # Plot histogram with density curve for "Delivery_person_Age"
 histplotcount_func("Delivery_person_Age", data, 5)
+```
 
+### Fill Missing Values
+```R
 # Calculate the mean of "Delivery_person_Age" to fill missing values
 mean_age <- mean(data$Delivery_person_Age)
 
@@ -52,13 +70,19 @@ data$Delivery_person_Age <- replace(data$Delivery_person_Age, is.na(data$Deliver
 
 # Check the distribution of "Delivery_person_Ratings"
 data$Delivery_person_Ratings %>% count()
+```
 
+### Filtering and Removing Rows
+```R
 # Remove rows where "Delivery_person_Ratings" is 6
 data <- data %>% filter(Delivery_person_Ratings != 6)
 
 # Plot histogram with density curve for "Delivery_person_Ratings"
 histplotcount_func("Delivery_person_Ratings", data, 5)
+```
 
+### Column Information
+```R
 # Loop through each column in the DataFrame and print information about each column
 for (i in colnames(data)) {
   print(paste0("Column Name: ", i))
@@ -70,10 +94,13 @@ for (i in colnames(data)) {
   print(unique_values)
   print(rep("=", 64))
 }
+```
 
+### Data Integrity Check
+```R
 # Count the number of records with zero values in "Delivery_location_latitude"
-count_zero_longitude <- sum(data$Delivery_location_latitude == "0")
-print(paste0("Number of records with Delivery_location_latitude equal to 0: ", count_zero_longitude))
+count_zero_latitude <- sum(data$Delivery_location_latitude == 0)
+print(paste0("Number of records with Delivery_location_latitude equal to 0: ", count_zero_latitude))
 
 # Count the number of records with zero values in "Restaurant_latitude"
 count_zero_latitude <- sum(data$Restaurant_latitude == 0)
@@ -82,16 +109,25 @@ print(paste0("Number of records with Restaurant_latitude equal to 0: ", count_ze
 # Count the number of records with zero values in "Restaurant_longitude"
 count_zero_longitude <- sum(data$Restaurant_longitude == 0)
 print(paste0("Number of records with Restaurant_longitude equal to 0: ", count_zero_longitude))
+```
 
+### Additional Visualizations
+```R
 # Plot histogram with density curve for "Restaurant_latitude"
 histplotcount_func("Restaurant_latitude", data, 5)
 
 # Plot histogram with density curve for "Restaurant_longitude"
 histplotcount_func("Restaurant_longitude", data, 5)
+```
 
+## Data Summary
+```R
 # Check the data types and number of non-null values for each column again
 summary(data)
+```
 
+### Fill Missing Values (Continued)
+```R
 # Calculate the median of "Delivery_location_longitude" to fill missing values
 median_Delivery_location_longitude <- median(data$Delivery_location_longitude)
 
@@ -103,7 +139,10 @@ median_Delivery_location_latitude <- median(data$Delivery_location_latitude)
 
 # Fill missing values in "Delivery_location_latitude" with the median
 data$Delivery_location_latitude <- replace(data$Delivery_location_latitude, is.na(data$Delivery_location_latitude), median_Delivery_location_latitude)
+```
 
+### Duplicate Rows
+```R
 # Check for duplicate rows
 duplicate_rows <- data[duplicated(data)]
 
@@ -113,17 +152,9 @@ data.shape
 # Calculate the percentage of rows with duplicates
 percentage_duplicates <- (data.shape[0] - without_nan[0]) / data.shape[0] * 100
 print(paste0("Percentage of rows with duplicates: ", round(percentage_duplicates, 2), "%"))
+```
 
+### Missing Values Percentage
+```R
 # Calculate the percentage of missing values in the dataset
-missing_values_percentage <- (with_nan[0] - without_nan[0]) / with_nan[0] * 100
-print(paste0("Percentage of missing values in the dataset: ", round(missing_values_percentage, 2), "%"))
-
-# Calculate the percentage of valid data in the dataset
-valid_data_percentage <- 100 - missing_values_percentage
-print(paste0("Percentage of valid data in the dataset: ", round(valid_data_percentage, 2), "%"))
-
-# Calculate the conversion rate
-conversion_rate <- (2938 / 42646) * 100
-print(paste0("Conversion rate: ", round(conversion_rate, 2), "%"))
-
-# Check the data types
+missing_values_percentage <- (with_nan[0] - without_nan[0]) / with_nan[
